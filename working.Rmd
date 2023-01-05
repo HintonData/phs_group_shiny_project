@@ -1,0 +1,58 @@
+---
+title: "Emergency Data -- Working"
+output: html_notebook
+---
+
+```{r libraries}
+library(tidyverse)
+```
+
+```{r data}
+ae_activity <- read_csv("data/ae_activity.csv") %>% 
+    janitor::clean_names()
+
+codes <- read_csv("data/codes_council.csv") %>% 
+    janitor::clean_names() %>% 
+    select(ca, ca_name, hscp, hscp_name, hb, hb_name)
+
+codes_hscp <- codes %>% 
+    select(hscp, hscp_name) %>% 
+    arrange(hscp) %>% 
+    distinct()
+
+codes_hb <- codes %>% 
+    select(hb, hb_name) %>% 
+    arrange(hb) %>% 
+    distinct()
+
+codes_ca <- codes %>% 
+    select(ca, ca_name) %>% 
+    arrange(ca)
+
+hospitals <- read_csv("data/codes_hospitals.csv") %>% 
+    janitor::clean_names()
+
+codes_hospitals <- hospitals %>% 
+    select(location, location_name)
+```
+
+```{r clean ae_activity}
+ae_activity %>% 
+    select(-country) %>% 
+    separate(col = month, into = c("year", "month"), sep = 4) %>% 
+    left_join(codes_hb, by = c("hbt" = "hb"))  %>% 
+    left_join(codes_hospitals, by = c("treatment_location" = "location")) %>% 
+    relocate(hb_name, .after = hbt) %>% 
+    relocate(location_name, .after = treatment_location) %>%
+    filter(as.numeric(year) >= 2020) %>% 
+    group_by(hb_name, year, month) %>% 
+    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate)) %>% 
+    ggplot(aes(x = month, y = number_of_attendances_aggregate, colour = hb_name, group = hb_name)) +
+        geom_point() +
+    geom_line() +
+    theme(legend.position = "bottom") +
+    facet_wrap(~year)
+```
+
+
+
