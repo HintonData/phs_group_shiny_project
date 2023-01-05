@@ -8,7 +8,7 @@ library(tidyverse)
 ```
 
 ```{r data}
-ae_activity <- read_csv("data/ae_activity.csv") %>% 
+ae_activity_raw <- read_csv("data/ae_activity.csv") %>% 
     janitor::clean_names()
 
 codes <- read_csv("data/codes_council.csv") %>% 
@@ -37,22 +37,26 @@ codes_hospitals <- hospitals %>%
 ```
 
 ```{r clean ae_activity}
-ae_activity %>% 
+ae_activity <- ae_activity_raw %>% 
     select(-country) %>% 
     separate(col = month, into = c("year", "month"), sep = 4) %>% 
     left_join(codes_hb, by = c("hbt" = "hb"))  %>% 
     left_join(codes_hospitals, by = c("treatment_location" = "location")) %>% 
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
-    filter(as.numeric(year) >= 2020) %>% 
+    filter(as.numeric(year) >= 2020)
+```
+
+```{r}
+ae_activity %>% 
     group_by(hb_name, year, month) %>% 
-    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate)) %>% 
-    ggplot(aes(x = month, y = number_of_attendances_aggregate, colour = hb_name, group = hb_name)) +
-        geom_point() +
-    geom_line() +
+    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
+    ggplot(aes(x = month, y = number_of_attendances_aggregate, fill = hb_name)) +
+    geom_col() +
     theme(legend.position = "bottom") +
     facet_wrap(~year)
 ```
+
 
 
 
