@@ -38,27 +38,14 @@ ae_activity <- ae_activity_raw %>%
     filter(between(as.numeric(year), 2020, 2022))
 ```
 
-```{r graph aggregate attendance by year/month}
-ae_activity %>% 
-    group_by(year, month) %>% 
-    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
-    ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
-    geom_col() +
-    theme(legend.position = "bottom", legend.title = element_blank()) +
-    scale_y_continuous(labels = scales::label_comma(),
-                       breaks = seq(0, 150000, by = 10000)) +
-    guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
-    facet_wrap(~year, scales = "free_x")
-```
-
-```{r simulate filters}
-input_hb_select <- "Grampian"
+```{r Graph and simulate filter}
+input_hb_select <- "All"
 
 ae_activity %>% 
     filter(hb_name == case_when(
         input_hb_select == "All" ~ hb_name,
         TRUE ~ input_hb_select)) %>% 
-    group_by(hb_name, year, month) %>% 
+    group_by(hb_name, department_type, year, month) %>% 
     summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
     ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
     geom_col() +
@@ -77,6 +64,8 @@ ae_activity %>%
     group_by(hb_name, year, month) %>% 
     summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate),
               number_meeting_target_aggregate = sum(number_meeting_target_aggregate),
+              attendance_greater8hrs = sum(attendance_greater8hrs),
+              attendance_greater12hrs = sum(attendance_greater12hrs),
               .groups = "drop") %>% 
     ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
         geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
