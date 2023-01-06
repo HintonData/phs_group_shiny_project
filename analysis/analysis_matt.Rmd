@@ -1,0 +1,87 @@
+---
+title: "Demographics"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+## import and clean data
+```{r}
+# healthboards
+hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+
+hb_clean <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+shb_raw <- read_csv(here("data/raw_data/special_health_boards_and_national_facilities.csv")) %>% clean_names()
+
+shb_clean <- shb_raw %>% 
+    select(shb, shb_name) %>% 
+    rename(hb = shb, hb_name = shb_name)
+
+
+hb_joined <- rbind(hb_clean, shb_clean)
+
+write_csv(hb_joined, here("data/clean_data/hb_simple.csv"))
+```
+
+```{r}
+##Demographics Age & Sex
+as_demo_raw <- read_csv(here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")) %>% clean_names()
+
+
+as_demo_clean <- as_demo_raw %>% 
+    left_join(hb_joined, "hb") %>%
+    select(-ends_with("qf")) %>%
+    mutate(sex = factor(sex, c("Male", "Female")),
+           year = as.numeric(str_sub(quarter, 1, 4)),
+                    is_covid_year = case_when(
+           year <= 2019 ~ "Pre_Covid", # before covid
+           year >= 2020 ~ "Covid"), # 2020 Q1 + covid appears?
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+    filter(!is.na(is_covid_year))
+    
+```
+
+
+## graphs
+
+### Total admissions
+```{r}
+demo_totals <- as_demo_clean %>% 
+    mutate(
+        #remove Year from Quarter column
+        q = str_sub(quarter, -2, -1),
+        #create a factor
+        q = factor(
+            q,
+            levels = c("Q1", "Q2", "Q3", "Q4"),
+            ordered = TRUE
+        ),
+        year = yq(quarter),
+        year = year(year)
+    )
+
+demo_totals %>% 
+  group_by(quarter) %>% 
+  summarise(total_age_sex = sum(episodes)) %>% 
+  ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+  geom_line(colour = "#078FCC") +
+  geom_point(colour = "#078FCC") +
+  theme_classic() +
+  scale_y_continuous(labels = scales::comma, 
+                     expand = c(0, 0),
+                     limits = c(0, NA)) +
+  labs(title = "Nationwide Hospital Attendances",
+       subtitle = "from July 2007 to June 2022",
+       y = "Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
