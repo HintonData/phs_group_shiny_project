@@ -11,32 +11,23 @@ library(tidyverse)
 ae_activity_raw <- read_csv("data/ae_activity.csv") %>% 
     janitor::clean_names()
 
-codes <- read_csv("data/codes_council.csv") %>% 
-    janitor::clean_names() %>% 
-    select(ca, ca_name, hscp, hscp_name, hb, hb_name)
-
-codes_hscp <- codes %>% 
-    select(hscp, hscp_name) %>% 
-    arrange(hscp) %>% 
-    distinct()
-
-codes_hb <- codes %>% 
-    select(hb, hb_name) %>% 
-    arrange(hb) %>% 
-    distinct()
-
-codes_ca <- codes %>% 
-    select(ca, ca_name) %>% 
-    arrange(ca)
-
-hospitals <- read_csv("data/codes_hospitals.csv") %>% 
+hb_raw <- read_csv(here::here("data/raw_data/hb14_hb19.csv")) %>% 
     janitor::clean_names()
+
+codes_hb <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+hospitals <- read_csv(here::here("data/raw_data/hospital_data.csv")) %>% 
+    janitor::clean_names()
+
+hospital_clean <- hospitals %>% 
+    select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
+    rename(longitude = x_coordinate, latitude = y_coordinate)
 
 codes_hospitals <- hospitals %>% 
     select(location, location_name)
-```
 
-```{r clean ae_activity}
 ae_activity <- ae_activity_raw %>% 
     select(-country) %>% 
     separate(col = month, into = c("year", "month"), sep = 4) %>% 
@@ -44,18 +35,61 @@ ae_activity <- ae_activity_raw %>%
     left_join(codes_hospitals, by = c("treatment_location" = "location")) %>% 
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
-    filter(as.numeric(year) >= 2020)
+    filter(between(as.numeric(year), 2020, 2022))
 ```
 
-```{r}
+```{r graph aggregate attendance by year/month}
 ae_activity %>% 
+    group_by(year, month) %>% 
+    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
+    ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
+    geom_col() +
+    theme(legend.position = "bottom", legend.title = element_blank()) +
+    scale_y_continuous(labels = scales::label_comma(),
+                       breaks = seq(0, 150000, by = 10000)) +
+    guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+    facet_wrap(~year, scales = "free_x")
+```
+
+```{r simulate filters}
+input_hb_select <- "Grampian"
+
+ae_activity %>% 
+    filter(hb_name == case_when(
+        input_hb_select == "All" ~ hb_name,
+        TRUE ~ input_hb_select)) %>% 
     group_by(hb_name, year, month) %>% 
     summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
-    ggplot(aes(x = month, y = number_of_attendances_aggregate, fill = hb_name)) +
+    ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
     geom_col() +
-    theme(legend.position = "bottom") +
-    facet_wrap(~year)
+    theme(legend.position = "bottom", legend.title = element_blank()) +
+    ggtitle(case_when(
+        input_hb_select == "All" ~ "NHS Scotland Aggregate A&E Attendance per Month",
+        TRUE ~ paste0("NHS ", input_hb_select, " Aggregate A&E Attendance per Month"))) +
+    scale_y_continuous(labels = scales::label_comma()) +
+    guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+    facet_wrap(~year, scales = "free_x")
+
+ae_activity %>% 
+    filter(hb_name == case_when(
+        input_hb_select == "All" ~ hb_name,
+        TRUE ~ input_hb_select)) %>% 
+    group_by(hb_name, year, month) %>% 
+    summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate),
+              number_meeting_target_aggregate = sum(number_meeting_target_aggregate),
+              .groups = "drop") %>% 
+    ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
+        geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
+    geom_col(fill = "green") +
+    theme(legend.position = "bottom", legend.title = element_blank()) +
+    ggtitle(case_when(
+        input_hb_select == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+        TRUE ~ paste0("NHS ", input_hb_select, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+    scale_y_continuous(labels = scales::label_comma()) +
+    guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+    facet_wrap(~year, scales = "free_x")
 ```
+
 
 
 
