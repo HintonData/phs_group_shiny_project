@@ -8,15 +8,22 @@ library(tidyverse)
 ```
 
 ```{r data}
-ae_activity_raw <- read_csv("data/ae_activity.csv") %>% 
+ae_activity_raw <- read_csv(here::here("data/raw_data/ae_activity.csv")) %>% 
     janitor::clean_names()
 
 hb_raw <- read_csv(here::here("data/raw_data/hb14_hb19.csv")) %>% 
     janitor::clean_names()
 
+extra_codes <- read_csv(here::here("data/raw_data/special-health-boards_19022021.csv")) %>% 
+    janitor::clean_names() %>% 
+    select(1:2) %>% 
+    rename("hb" = "shb",
+           "hb_name" = "shb_name")
+
 codes_hb <- hb_raw %>% 
     select(hb, hb_name) %>% 
-    mutate(hb_name = str_remove(hb_name, "NHS "))
+    mutate(hb_name = str_remove(hb_name, "NHS ")) %>% 
+    rbind(extra_codes)
 
 hospitals <- read_csv(here::here("data/raw_data/hospital_data.csv")) %>% 
     janitor::clean_names()
@@ -36,9 +43,12 @@ ae_activity <- ae_activity_raw %>%
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
     filter(between(as.numeric(year), 2020, 2022))
+
+beds_raw <- read_csv(here::here("data/raw_data/beds_by_nhs_board_of_treatment_and_specialty.csv")) %>% 
+    janitor::clean_names()
 ```
 
-```{r Graph and simulate filter}
+```{r AE Graph and simulate filter}
 input_hb_select <- "All"
 
 ae_activity %>% 
@@ -68,7 +78,7 @@ ae_activity %>%
               attendance_greater12hrs = sum(attendance_greater12hrs),
               .groups = "drop") %>% 
     ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
-        geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
+    geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
     geom_col(fill = "green") +
     theme(legend.position = "bottom", legend.title = element_blank()) +
     ggtitle(case_when(
@@ -79,7 +89,67 @@ ae_activity %>%
     facet_wrap(~year, scales = "free_x")
 ```
 
+```{r beds}
+beds <- beds_raw %>% 
+    left_join(codes_hb, by = "hb") %>% 
+    left_join(codes_hospitals, by = "location") %>% 
+    filter(hb != location) %>% 
+    mutate(yq = as.factor(quarter)) %>% 
+    separate(col = quarter, into = c("year", "quarter"), sep = 4) %>% 
+    mutate(quarter = str_remove(quarter, "Q")) %>% 
+    relocate(hb_name, .after = hb) %>% 
+    relocate(location_name, .after = location) %>% 
+    filter(between(as.numeric(year), 2017, 2022))
+```
 
+```{r staffed beds vs occupied beds}
+beds %>% 
+    group_by(yq) %>% 
+    summarise(all_staffed_beddays = sum(all_staffed_beddays),
+              total_occupied_beddays = sum(total_occupied_beddays),
+              empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+    ggplot(aes(x = yq)) +
+    geom_point(aes(y = all_staffed_beddays, group = 1)) +
+    geom_line(aes(y = all_staffed_beddays,group = 1, colour = all_staffed_beddays), colour = "green") +
+    geom_point(aes(y = total_occupied_beddays, group = 1)) +
+    geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1), colour = "red") +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2017Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2018Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2018Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2019Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2019Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2020Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2020Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2021Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2021Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+    scale_y_continuous(labels = scales::label_comma()) +
+    labs(y = "Number of Bed Days",
+         x = "Year, Quarter") +
+    theme(axis.text.x = element_text(angle = 90))
+```
 
+```{r}
+### Currently breaks if you try to draw every specialty. Works for individuals. TODO
+input_specialty_select = "All"
 
+beds %>% 
+        filter(specialty_name == case_when(
+        input_specialty_select == "All" ~ specialty_name,
+        TRUE ~ input_specialty_select)) %>% 
+    group_by(year, quarter, specialty_name) %>% 
+    summarise(all_staffed_beddays = sum(all_staffed_beddays),
+              total_occupied_beddays = sum(total_occupied_beddays),
+              empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+    ggplot(aes(x = quarter)) +
+    geom_point(aes(y = total_occupied_beddays, colour = year)) +
+    geom_line(aes(y = total_occupied_beddays, colour = year, group = year)) +
+    scale_y_continuous(labels = scales::label_comma()) +
+    theme(legend.position = "bottom")
+```
 
