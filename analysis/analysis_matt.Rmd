@@ -107,6 +107,16 @@ as_demo_clean %>%
   scale_fill_brewer(palette = "Dark2")+
   labs(title = "Proportion of attendances by sex",
        subtitle = "Pre-covid vs During Covid",
-       fill = "Sex")
+       fill = "Sex")+
+  #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(face = "bold", 
+                                   size = 11, 
+                                   colour = "black"))
 ```
 
