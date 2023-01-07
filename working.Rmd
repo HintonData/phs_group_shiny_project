@@ -119,13 +119,13 @@ beds %>%
     geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2018Q3", linetype = "dashed") +
     geom_vline(xintercept = "2019Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2019Q3", linetype = "dashed") +
     geom_vline(xintercept = "2020Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2020Q3", linetype = "dashed") +
     geom_vline(xintercept = "2021Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2021Q3", linetype = "dashed") +
     geom_vline(xintercept = "2022Q1", linetype = "dashed") +
     scale_y_continuous(labels = scales::label_comma()) +
@@ -139,7 +139,7 @@ beds %>%
 input_specialty_select = "All"
 
 beds %>% 
-        filter(specialty_name == case_when(
+    filter(specialty_name == case_when(
         input_specialty_select == "All" ~ specialty_name,
         TRUE ~ input_specialty_select)) %>% 
     group_by(year, quarter, specialty_name) %>% 
@@ -151,5 +151,58 @@ beds %>%
     geom_line(aes(y = total_occupied_beddays, colour = year, group = year)) +
     scale_y_continuous(labels = scales::label_comma()) +
     theme(legend.position = "bottom")
+```
+
+```{r bed variation in demand}
+beds %>% 
+    group_by(yq) %>% 
+    summarise(all_staffed_beddays = sum(all_staffed_beddays),
+              total_occupied_beddays = sum(total_occupied_beddays),
+              empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+    mutate(demand_variance = total_occupied_beddays - lag(total_occupied_beddays),
+           variance_bool = sign(demand_variance)) %>% 
+    slice(-1) %>% 
+    ggplot(aes(x = yq)) +
+    geom_point(aes(y = demand_variance)) +
+    geom_line(aes(y = demand_variance, group = 1), colour = "firebrick") +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(demand_variance), ymax = Inf), alpha = 0.01) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(demand_variance), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(demand_variance), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(demand_variance), ymax = Inf), alpha = 0.01) +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(demand_variance), ymax = Inf), alpha = 0.01) +
+    scale_y_continuous(labels = scales::label_comma()) +
+    labs(y = "Bed Day Demand Variance per Quarter",
+         x = "Year, Quarter") +
+    theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r bed variance boolean}
+beds %>% 
+    group_by(yq) %>% 
+    summarise(all_staffed_beddays = sum(all_staffed_beddays),
+              total_occupied_beddays = sum(total_occupied_beddays),
+              empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+    mutate(demand_variance = total_occupied_beddays - lag(total_occupied_beddays),
+           variance_bool = sign(demand_variance),
+           variance_bool = if_else(variance_bool > 0, TRUE, FALSE)) %>% 
+    slice(-1) %>% 
+    ggplot(aes(x = yq)) +
+    geom_point(aes(y = variance_bool)) +
+    geom_line(aes(y = variance_bool, group = 1), colour = "firebrick") +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = FALSE, ymax = TRUE), alpha = 0.01) +
+    geom_vline(xintercept = "2017Q4", linetype = "dashed") +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = FALSE, ymax = TRUE), alpha = 0.01) +
+    geom_vline(xintercept = "2018Q4", linetype = "dashed") +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = FALSE, ymax = TRUE), alpha = 0.01) +
+    geom_vline(xintercept = "2019Q4", linetype = "dashed") +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = FALSE, ymax = TRUE), alpha = 0.01) +
+    geom_vline(xintercept = "2020Q4", linetype = "dashed") +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = FALSE, ymax = TRUE), alpha = 0.01) +
+    geom_vline(xintercept = "2021Q4", linetype = "dashed") +
+    scale_y_discrete(breaks = c(FALSE, TRUE), limits = c(FALSE, TRUE), expand = c(0.1, 0.1)) +
+    labs(y = "Bed Demand Gain",
+         x = "Year, Quarter") +
+    theme(axis.text.x = element_text(angle = 90))
 ```
 
