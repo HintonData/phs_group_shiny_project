@@ -39,6 +39,7 @@ write_csv(here("data/clean_data", file = "covid_impacts_clean"))
 covid_impacts %>%
     mutate(week_ending = ymd(week_ending)) %>% 
     group_by(week_ending) %>% 
+    filter(sex == "All") %>% 
     summarise(sum_admissions = sum(number_admissions)) %>% 
     ggplot() +
     aes(x = week_ending, y = sum_admissions) +
