@@ -80,5 +80,5 @@ covid_impacts <- covid_impacts %>%
     clean_names() %>% 
     left_join(hb_clean)
 
-write_csv(here("data/clean_data", file = "covid_impacts_clean.csv"))
+write_csv(covid_impacts, here("data/clean_data/covid_impacts_clean.csv"))
 
