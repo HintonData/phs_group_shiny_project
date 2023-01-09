@@ -1,0 +1,278 @@
+location,location_name,postcode,address_line,hb,hscp
+A101H,Arran War Memorial Hospital,KA27 8LF,"Lamlash, Isle of Arran",S08000015,S37000020
+A103H,Ayrshire Central Hospital,KA12 8SS,"Kilwinning Road, Irvine",S08000015,S37000020
+A105H,Kirklandside Hospital,KA1 5LH,"Kirklandside, Kilmarnock, Ayrshire",S08000015,S37000008
+A110H,Lady Margaret Hospital,KA28 0HF,"College St, Millport, Isle of Cumbrae",S08000015,S37000020
+A111H,University Hospital Crosshouse,KA2 0BE,"Kilmarnock Road, Kilmarnock, Ayrshire",S08000015,S37000008
+A112H,Brooksby Day Hospital,KA30 8NE,"18 Greenock Road, Largs",S08000015,S37000020
+A114H,Warrix Avenue Mental Health Community Rehabilitation Unit,KA12 0DP,"Warrix Avenue, Irvine",S08000015,S37000020
+A201H,Ailsa Hospital,KA6 6AB,"Dalmellington Road, Ayr",S08000015,S37000027
+A202E,Maybole Day Hospital,KA19 7BY,"6 High Street, Maybole",S08000015,S37000027
+A208H,Biggart Hospital,KA9 2HQ,"Biggart Road, Prestwick",S08000015,S37000027
+A210H,University Hospital Ayr,KA6 6DX,"Dalmellington Road, Ayr",S08000015,S37000027
+A211H,Arrol Park Resource Centre,KA7 4DW,"10 Doonfoot Road, Ayr",S08000015,S37000027
+A214H,Three Towns Resource Centre,KA21 5RF,"Nelson Road, Saltcoats",S08000015,S37000020
+A215H,East Ayrshire Community Hospital,KA18 1EF,"Ayr Road, Cumnock",S08000015,S37000008
+A216H,Girvan Community Hospital,KA26 9HQ,"Bridgemill, Girvan, Ayrshire",S08000015,S37000027
+A217H,Woodland View,KA12 8SS,"Ayrshire Central Hospital, Kilwinning Road, Irvine",S08000015,S37000020
+B103H,The Knoll Hospital,TD11 3EL,"Station Road, Duns",S08000016,S37000025
+B104H,Galavale House,TD1 3EB,"Tweed Road, Galashiels",S08000016,S37000025
+B105H,Hawick Community  Hospital,TD9 7AH,"Victoria Road, Hawick",S08000016,S37000025
+B108H,Andrew Lang Unit,TD7 4LH,"Viewfield House, Selkirk",S08000016,S37000025
+B114H,Kelso Hospital,TD5 7JP,"Inch Road, Kelso",S08000016,S37000025
+B118H,Hay Lodge Hospital,EH45 8JG,"Neidpath Road, Peebles",S08000016,S37000025
+B120H,Borders General Hospital,TD6 9BS,Melrose,S08000016,S37000025
+B121H,Hawick Psychiatric Day Hospital,TD9 7AH,"c/o Hawick Community Hospital, Victoria Road, Hawick",S08000016,S37000025
+B122H,Hawick Psychogeriatric Day Hospital,TD9 0BG,"West Port, Drumlanrig Square, Hawick",S08000016,S37000025
+B123H,Peebles Psychogeriatric Day Hospital,EH45 8BD,"Firholm, Innerleithen Road, Peebles",S08000016,S37000025
+B124H,Galashiels Psychogeriatric Day Hospital,TD1 1ST,"Sime Place, Galashiels",S08000016,S37000025
+B127H,Eyemouth Day Hospital,TD14 5DA,"Houndlaw Park, Eyemouth",S08000016,S37000025
+B128H,Crumhaugh House,TD9 0BA,"Crumhaugh Road, Hawick",S08000016,S37000025
+B129H,Melburn Lodge,TD6 9BS,"Borders General Hospital, Melrose",S08000016,S37000025
+B130H,Huntlyburn House,TD6 9BD,"The Cottages, Huntlyburn, Melrose",S08000016,S37000025
+Y101H,Castle Douglas Community Hospital,DG7 1EE,"Academy Street, Castle Douglas",S08000017,S37000006
+Y103H,Crichton Royal Hospital,DG1 4TG,"Glencaple Road, Dumfries",S08000017,S37000006
+Y105H,Nithbank Hospital,DG1 2SA,"Nithbank, Dumfries",S08000017,S37000006
+Y106H,Kirkcudbright Cottage Hospital,DG6 4BE,"Townend, Kirkcudbright",S08000017,S37000006
+Y107H,Thomas Hope Hospital,DG13 0JX,Langholm,S08000017,S37000006
+Y108H,Lochmaben Hospital,DG11 1RQ,"Lochmaben, Lockerbie",S08000017,S37000006
+Y109H,Moffat Community Hospital,DG10 9JY,"Holmend, Moffat",S08000017,S37000006
+Y110H,Newton Stewart Hospital,DG8 6LZ,Newton Stewart,S08000017,S37000006
+Y114H,Thornhill Hospital,DG3 5AA,Thornhill,S08000017,S37000006
+Y120H,Annan Hospital,DG12 6NQ,"Stapleton Road, Annan",S08000017,S37000006
+Y124H,Cromarty,DG9 7JL,"Sun Street, Stranraer",S08000017,S37000006
+Y126H,Acorn House,DG1 4SR,"Kingholm Road, Dumfries",S08000017,S37000006
+Y129H,Wellgreen Cottages,DG1 4TD,"Glencaple Road, Dumfries",S08000017,S37000006
+Y130H,Innistaigh,DG9 7EH,"Dalrymple Street, Stranraer",S08000017,S37000006
+Y132H,Cardoness,DG1 4TG,"Bankend Road, Dumfries",S08000017,S37000006
+Y134H,Treastaigh,DG12 6JP,"Stapleton Road, Annan",S08000017,S37000006
+Y135H,Nithview Day Hospital,DG1 2SD,"Nithbank, Dumfries",S08000017,S37000006
+Y136H,Laurel Bank (CETU),DG1 2SA,"Nithbank, Dumfries",S08000017,S37000006
+Y138H,Heather Lodge (CETU),DG1 2SA,"Nithbank, Dumfries",S08000017,S37000006
+Y142H,Lismore,DG12 5HJ,"41A Prestonfield Road, Annan",S08000017,S37000006
+Y144H,Galloway Community Hospital,DG9 7DQ,"Dalrymple Street, Stranraer",S08000017,S37000006
+Y145H,Midpark Hospital,DG1 4TN,"Bankend Road, Dumfries",S08000017,S37000006
+Y146H,Dumfries & Galloway Royal Infirmary,DG2 8RX,"Cargenbridge, Dumfries",S08000017,S37000006
+F701H,Cameron Hospital,KY8 5RR,"Cameron Bridge, Windygates, Fife",S08000029,S37000032
+F704H,Victoria Hospital,KY2 5AH,"Hayfield Road, Kirkcaldy",S08000029,S37000032
+F705H,Victoria Maternity Unit,KY2 5AH,"Hayfield Road, Kirkcaldy",S08000029,S37000032
+F708H,Adamson Hospital,KY15 4JG,"Bank Street, Cupar",S08000029,S37000032
+F709H,St Andrews Community Hospital,KY16 8AR,"Largo Road, St Andrews",S08000029,S37000032
+F710H,Randolph Wemyss Memorial Hospital,KY8 1HU,"Wellesley Road, Buckhaven",S08000029,S37000032
+F711H,Whytemans Brae Hospital,KY1 2ND,"Whytemans Brae, Kirkcaldy",S08000029,S37000032
+F712H,Stratheden Hospital,KY15 5RR,"Stratheden, By Springfield, Cupar",S08000029,S37000032
+F714H,Weston Day Hospital,KY15 4AN,"West Port, Cupar",S08000029,S37000032
+F716H,Glenrothes Hospital,KY7 5TG,"Lodge Rise, Glenrothes, Fife",S08000029,S37000032
+F805H,Queen Margaret Hospital,KY12 0SU,"Whitefield Road, Dunfermline",S08000029,S37000032
+F810H,Lynebank Hospital,KY11 8JH,"Halbeath Road, Dunfermline",S08000029,S37000032
+V102H,Falkirk Community Hospital,FK1 5QE,"Majors Loan, Falkirk",S08000019,S37000013
+V105H,Bo'ness Hospital,EH51 0DH,"Dean Road, Bo'ness",S08000019,S37000013
+V106H,Bellsdyke Hospital,FK5 4SF,"Bellsdyke Road, Larbert",S08000019,S37000013
+V201H,Stirling Community Hospital,FK8 2AU,"Livilands Gate, Stirling",S08000019,S37000005
+V214H,Lochview Hospital,FK5 4SE,"Stirling Road, Larbert",S08000019,S37000013
+V215H,Bungalows/Red Lodge,FK5 4AE,"Stirling Road, Larbert, Stirlingshire",S08000019,S37000013
+V216H,Clackmannanshire Community Healthcare Centre,FK10 3JQ,"Hall Park Road, Sauchie",S08000019,S37000005
+V217H,Forth Valley Royal Hospital,FK5 4WR,"Stirling Road, Larbert",S08000019,S37000013
+N101H,Aberdeen Royal Infirmary,AB25 2ZN,"Foresterhill Road, Aberdeen",S08000020,S37000001
+N102H,Woodend General Hospital,AB15 6XS,Aberdeen,S08000020,S37000001
+N103H,City Hospital,AB24 5AU,"Urquhart Road, Aberdeen",S08000020,S37000001
+N104H,Woolmanhill Hospital,AB25 1LD,"Skene Street, Aberdeen",S08000020,S37000001
+N106H,The Baird Family Hospital,AB25 2ZL,"Foresterhill Health Campus, Foresterhill Road, Aberdeen",S08000020,S37000001
+N111H,Hyperbaric Centre,AB16 5FA,"123 Ashgrove Road West, Aberdeen",S08000020,S37000001
+N121H,Royal Aberdeen Children's Hospital,AB25 2ZG,"Westburn Drive, Aberdeen",S08000020,S37000001
+N151H,Aboyne Hospital,AB34 5HQ,"Bellwood Road, Aboyne",S08000020,S37000002
+N161H,Aberdeen Maternity Hospital,AB25 2ZL,"Foresterhill, Aberdeen",S08000020,S37000001
+N181H,Glen O'Dee Hospital,AB31 5SA,Banchory,S08000020,S37000002
+N183H,Roxburghe House,AB25 2ZH,"Cornhill Site, Ashgrove Road, Aberdeen",S08000020,S37000001
+N184H,Maidencraig House,AB15 6XS,"Woodend Hospital, Eday Road",S08000020,S37000001
+N198H,Royal Cornhill Hospital,AB25 2ZH,"Cornhill Road, Aberdeen",S08000020,S37000001
+N331H,Inverurie Hospital,AB51 3UL,"Upperboat Road, Inverurie",S08000020,S37000002
+N332H,Insch & District War Memorial Hosp.,AB52 6JJ,"Rannes Street, Insch",S08000020,S37000002
+N333H,Peterhead Community Hospital,AB42 2XB,"Links Terrace, Peterhead",S08000020,S37000002
+N334H,Fraserburgh Hospital,AB43 9NF,"Lochpots Road, Fraserburgh",S08000020,S37000002
+N335H,Jubilee Hospital,AB54 8EX,"Bleachfield Street, Huntly",S08000020,S37000002
+N336H,Turriff Cottage Hospital,AB53 4DQ,"Balmellie Road, Turriff",S08000020,S37000002
+N337H,Chalmers Hospital,AB45 1JA,Banff,S08000020,S37000002
+N352H,Ugie Hospital,AB42 1LZ,"Ugie Road, Peterhead",S08000020,S37000002
+N401E,Buckie Day Hospital,AB56 1SF,"The Bungalow, Seafield Hospital, Buckie",S08000020,S37000019
+N411H,Dr Gray's Hospital,IV30 1SN,"Elgin, Morayshire",S08000020,S37000019
+N431H,Seafield Hospital,AB56 1SF,"Barrhill Road, Buckie",S08000020,S37000019
+N432H,Stephen Cottage Hospital,AB55 4BH,"Stephen Avenue, Dufftown",S08000020,S37000019
+N433H,Turner Memorial Hospital,AB55 5DJ,"Turner Street, Keith",S08000020,S37000019
+N434H,Leanchoil Hospital,IV36 2RF,"91 St Leonard's Road, Forres",S08000020,S37000019
+N451H,Fleming Cottage Hospital,AB38 9PR,"Queens Road, Aberlour",S08000020,S37000019
+N492H,Rehabilitation Hospital,AB11 7RS,"15 Polmuir Road, Aberdeen",S08000020,S37000001
+N494H,Kincardine Community Hospital,AB39 2NJ,"Kirkton Road, Stonehaven",S08000020,S37000002
+N495H,Pluscarden Clinic,IV30 1SN,"Dr Gray's Hospital, Elgin",S08000020,S37000019
+N496H,375 Great Western Lodge,AB10 6NU,"375 Great Western Road, Aberdeen",S08000020,S37000001
+N499H,Elmwood,AB25 3BW,"Ashgrove Road, Aberdeen",S08000020,S37000001
+N500H,Aberdeen Community Health and Care Village,AB24 5HY,"50 Frederick Street, Aberdeen",S08000020,S37000001
+N501H,Rosewell House (NHS Wards),AB15 6XN,"194 Kings Gate, Aberdeen",S08000020,S37000001
+C204H,Dumbarton Joint Hospital/Riverview Resource Centre,G82 5JA,"Cardross Road, Dumbarton",S08000031,S37000029
+C206H,Vale of Leven General Hospital,G83 0UA,"North Main Street, Alexandria",S08000031,S37000029
+C313H,Inverclyde Royal Hospital,PA16 0XN,"Larkfield Road, Greenock",S08000031,S37000017
+C403H,Dykebar Hospital,PA2 7DE,"Grahamston Road, Paisley",S08000031,S37000024
+C418H,Royal Alexandra Hospital,PA2 9PN,"Corsebar Road, Paisley",S08000031,S37000024
+C419H,Larkfield Unit,PA16 0XN,"Inverclyde Royal Hospital, Larkfield Road, Greenock",S08000031,S37000017
+C420H,Blythswood House,PA4 8NT,"Fulbar Lane, Renfrew",S08000031,S37000024
+G106H,Glasgow Dental Hospital and School,G2 3JZ,"378 Sauchiehall Street, Glasgow",S08000031,S37000034
+G107H,Glasgow Royal Infirmary,G4 0SF,"84 Castle Street, Glasgow",S08000031,S37000034
+G108H,The Princess Royal Maternity Unit,G31 2ER,"16 Alexandra Parade, Glasgow",S08000031,S37000034
+G109H,Lightburn Hospital,G32 6NB,"966 Carntyne Road, Glasgow",S08000031,S37000034
+G110H,Acorn Street Day Hospital,G40 4AN,"21-23 Acorn Street, Glasgow",S08000031,S37000034
+G112H,Parkview Resource Centre,G32 7AX,"152 Wellshot Road, Glasgow",S08000031,S37000034
+G113H,Auchinlea Resource Centre,G34 9HQ,"Auchinlea House, Auchinlea Road, Glasgow",S08000031,S37000034
+G207H,Stobhill Hospital,G21 3UW,"133 Balornock Road, Glasgow",S08000031,S37000034
+G212H,Shawpark Resource Centre,G20 9DR,"41 Shawpark Street, Glasgow",S08000031,S37000034
+G214H,Springpark Resource Centre/Day Hosp,G22 5EU,"101 Denmark Street, Glasgow",S08000031,S37000034
+G302H,Leverndale Hospital,G53 7TU,"510 Crookston Road, Glasgow",S08000031,S37000034
+G303H,Mearnskirk House,G77 5RZ,"Newton Mearns, Glasgow",S08000031,S37000011
+G306H,New Victoria Hospital,G42 9LF,"55 Grange Road, Glasgow",S08000031,S37000034
+G405H,Queen Elizabeth University Hospital,G51 4TF,"1345 Govan Road, Glasgow",S08000031,S37000034
+G408H,Florence Street Mental Health Resource Centre,G5 0YX,"26 Florence Street, Glasgow",S08000031,S37000034
+G410H,Shawmill Resource Centre,G43 1RR,"35 Well Green, Glasgow",S08000031,S37000034
+G504H,Gartnavel General Hospital (Admin Purposes),G12 0YN,"1053 Great Western Road, Glasgow",S08000031,S37000034
+G505H,Gartnavel Royal Hospital,G12 0XH,"1055 Great Western Road, Glasgow",S08000031,S37000034
+G507H,Centre for Integrative Care,G12 0YN,"1053 Great Western Road, Glasgow",S08000031,S37000034
+G513H,Royal Hospital for Children,G51 4TF,"1345 Govan Road, Glasgow",S08000031,S37000034
+G516H,West Glasgow,G12 0YN,"1053 Great Western Road, Glasgow",S08000031,S37000034
+G517H,Beatson West of Scotland Cancer Centre,G12 0YN,"1053 Great Western Road, Glasgow",S08000031,S37000034
+G596H,Anvil Resource Centre,G31 5ES,"81 Salamanca Street, Glasgow",S08000031,S37000034
+G598H,Arran Resource Centre,G40 2BJ,"121 Orr Street, Bridgeton, Glasgow",S08000031,S37000034
+G599H,Riverside Resource Centre,G11 6HU,"547 Dumbarton Road, Glasgow",S08000031,S37000034
+G600H,Festival Business Park,G51 1DH,"150 Brand Street, Glasgow",S08000031,S37000034
+G602H,Eastwood Resource Centre,G76 7QF,"38 Seres Rd, Clarkston, Glasgow",S08000031,S37000011
+G603H,Arndale Resource Centre,G15 7TS,"80/90 Kinfauns Drive, Glasgow",S08000031,S37000034
+G605H,Bridgeview Resource Centre,G20 9PX,"The Quadrangle, 49 Ruchill Street, Glasgow",S08000031,S37000034
+G607H,Woodlands Resource Centre,G66 2HL,"15-17 Waterloo Close, Kirkintilloch",S08000031,S37000009
+G608H,2-4 Waterloo Close,G66 2HL,"2-4 Waterloo Close, Kirkintilloch",S08000031,S37000009
+G609H,The Orchards,G20 7SJ,"135 Panmure Street, Glasgow",S08000031,S37000034
+G610H,Pineview,G61 1QN,"Switchback Road, Bearsden, Glasgow",S08000031,S37000009
+G611H,Netherton,G13 1AL,"19 Blackwood Street, Glasgow",S08000031,S37000034
+G612H,Rowanbank Clinic,G21 3UL,"Balornock Road, Glasgow",S08000031,S37000034
+G613H,Skye House,G21 3UZ,"133 Balornock Road, Glasgow",S08000031,S37000034
+G614H,Orchard View,PA16 0XN,"Inverclyde Adult and Older Peoples, Continuing Care Hospital, Larkfield Road, Greenock",S08000031,S37000017
+G615H,The Mary Aitkenhead Centre,G81 1EG,"St Margaret's Hospice, East Barns Street, Clydebank",S08000031,S37000029
+C101H,Argyll and Bute Hospital,PA31 8LD,"Blarbuie Road, Lochgilphead",S08000022,S37000004
+C106H,Cowal Community Hospital,PA23 7RL,"360 Argyll Street, Dunoon",S08000022,S37000004
+C108H,Islay Hospital,PA43 7JD,"Gortonvogie Road, Bowmore, Isle of Islay",S08000022,S37000004
+C113H,Victoria Hospital,PA20 9JJ,"High Street, Rothesay",S08000022,S37000004
+C114H,Victoria Hospital Annexe,PA20 9JH,"Townhead, Rothesay",S08000022,S37000004
+C121H,Lorn & Islands Hospital,PA34 4HH,"Glengallan Road, Oban",S08000022,S37000004
+C122H,Campbeltown Hospital,PA28 6LE,"Ralston Road, Campbeltown",S08000022,S37000004
+H101H,Dunbar Hospital,KW14 7XE,"Thurso, Caithness",S08000022,S37000016
+H103H,Caithness General Hospital,KW1 5NS,"Cliff Road, Wick",S08000022,S37000016
+H104H,Wick Town and County Hospital,KW1 5NQ,"Hospital Road, Wick, Caithness",S08000022,S37000016
+H106H,Lawson Memorial Hospital,KW10 6SS,"Station Road, Golspie",S08000022,S37000016
+H201H,RNI Community Hospital,IV3 5SF,"Ness Walk, Inverness",S08000022,S37000016
+H202H,Raigmore Hospital,IV2 3UJ,Inverness,S08000022,S37000016
+H208H,Nairn Town and County Hospital,IV12 5EE,"Cawdor Road, Nairn",S08000022,S37000016
+H210H,Ian Charles Community Hospital,PH26 3HR,"Castle Road East, Grantown-on-Spey",S08000022,S37000016
+H211H,St Vincent's Hospital,PH21 1EX,"Gynack Road, Kingussie",S08000022,S37000016
+H212H,Belford Hospital,PH33 6BS,"Belford Road, Fort William",S08000022,S37000016
+H213H,Glencoe Hospital,PH49 4HT,"Glencoe, Ballachulish, Argyll",S08000022,S37000016
+H214H,Mackinnon Memorial Hospital,IV49 9AA,"Broadford, Isle of Skye",S08000022,S37000016
+H215H,Portree Hospital,IV51 9BZ,"Portree, Isle of Skye",S08000022,S37000016
+H217H,Ross Memorial Hospital,IV15 9QT,"Ferry Road, Dingwall",S08000022,S37000016
+H219H,County Community Hospital Invergordon,IV18 0JR,Invergordon,S08000022,S37000016
+H221H,Osprey House,IV2 3DZ,"Raigmore Avenue, Inverness",S08000022,S37000016
+H223H,New Craigs Hospital,IV3 8PJ,"Leachkin Road, Inverness",S08000022,S37000016
+H224H,Mid-Argyll Community Hospital and Integrated Care Centre,PA31 8JZ,"Lochgilphead, Argyll",S08000022,S37000004
+H225H,Dunaros Community Hospital,PA72 6JF,"Salen, Isle of Mull, Argyll",S08000022,S37000004
+H226H,Migdale Hospital,IV24 3ER,"Cherry Grove, Bonar Bridge, Sutherland",S08000022,S37000016
+H227H,Mull and Iona Community Hospital,PA65 6BH,"Java Road, Craignure, Isle Of Mull",S08000022,S37000004
+H228H,Badenoch and Strathspey Community Hospital,PH22 1AJ,"Cairnview Road, Aviemore",S08000022,S37000016
+H230H,National Treatment Centre,IV2 5NA,"Inverness Campus, Inverness",S08000022,S37000016
+L103H,Coathill Hospital,ML5 4DN,"Hospital Street, Coatbridge",S08000032,S37000035
+L104H,Victoria Memorial Cottage Hospital,G65 9AG,"19 Glasgow Road, Kilsyth",S08000032,S37000035
+L105H,Wester Moffat Hospital,ML6 8LW,"Towers Road, Airdrie",S08000032,S37000035
+L106H,University Hospital Monklands,ML6 0JS,"Monkscourt Avenue, Airdrie",S08000032,S37000035
+L203H,Cleland Hospital,ML1 5NR,"Cleland, Motherwell, Lanarkshire",S08000032,S37000035
+L204H,Hartwoodhill Hospital,ML7 4LA,"Hartwood, Shotts",S08000032,S37000035
+L206H,Kello Hospital,ML12 6AF,"Johns Loan, Biggar",S08000032,S37000028
+L207H,Lady Home Cottage Hospital,ML11 0RH,"Douglas, Lanark",S08000032,S37000028
+L209H,Lockhart Hospital,ML11 7RX,"Whitelees Road, Lanark",S08000032,S37000028
+L211H,Roadmeetings Hospital,ML8 4PS,"Roadmeetings, Carluke",S08000032,S37000028
+L213H,Strathclyde Hospital,ML1 3BW,"Crawford Street, Motherwell",S08000032,S37000035
+L216H,Kirklands Hospital,G71 8BB,"Fallside Road, Bothwell",S08000032,S37000028
+L218H,Airbles Road Centre,ML1 2TJ,"Airbles Road, Motherwell",S08000032,S37000035
+L302H,University Hospital Hairmyres,G75 8RG,"Eaglesham Road, East Kilbride",S08000032,S37000028
+L304H,Stonehouse Hospital,ML9 3NT,"Strathaven Road, Stonehouse",S08000032,S37000028
+L305H,Udston Hospital,ML3 9LA,"Farm Road, Hamilton",S08000032,S37000028
+L306H,Coathill House,ML5 5EA,"3 Old Monkland Road, Coatbridge",S08000032,S37000035
+L307H,Beckford Lodge,ML3 0AZ,"Caird Street, Hamilton",S08000032,S37000028
+L308H,University Hospital Wishaw,ML2 0DP,"50 Netherton Street, Wishaw",S08000032,S37000035
+L395E,Red Deer Centre/Day Hospital,G75 8NH,"Alberta Avenue, Westwood, East Kilbride",S08000032,S37000028
+S102H,Belhaven Hospital,EH42 1TR,"Hospital Road, Dunbar",S08000024,S37000010
+S103H,Corstorphine Hospital,EH12 6TT,"136 Corstorphine Road, Edinburgh",S08000024,S37000012
+S107H,Edenhall Hospital,EH21 7TZ,"Edenhall Road, Musselburgh",S08000024,S37000010
+S108H,Edington Cottage Hospital,EH39 4PU,"54 St Baldred's Road, North Berwick",S08000024,S37000010
+S109H,Herdmanflat Hospital,EH41 3BU,"Aberlady Road, Haddington",S08000024,S37000010
+S114H,Royal Victoria Hospital,EH4 2DN,"13 Craigleith Road, Edinburgh",S08000024,S37000012
+S116H,Western General Hospital,EH4 2XU,"Crewe Road South, Edinburgh",S08000024,S37000012
+S201H,Astley Ainslie Hospital,EH9 2HL,"Grange Loan, Edinburgh",S08000024,S37000012
+S203H,Chalmers Hospital,EH3 9HQ,"55 Lauriston Place, Edinburgh",S08000024,S37000012
+S206H,Edinburgh Dental Institute,EH3 9HA,"4th Floor, Lauriston Building, Lauriston Place, Edinburgh",S08000024,S37000012
+S209H,Liberton Hospital,EH16 6UB,"Lasswade Road, Edinburgh",S08000024,S37000012
+S217H,Royal Edinburgh Hospital,EH10 5HF,"23 Tipperlinn Road, Edinburgh",S08000024,S37000012
+S232H,Cambridge Street Day Centre,EH1 2DY,"5/7 Cambridge Street, Edinburgh",S08000024,S37000012
+S234H,William Fraser Centre,EH10 5HF,"Tipperlinn Road, Edinburgh",S08000024,S37000012
+S235H,The Islay Centre,EH10 5HF,"Tipperlinn Road, Edinburgh",S08000024,S37000012
+S240H,Glencorse Day Centre,EH26 0QZ,"Milton Mill, Milton Bridge, Penicuik",S08000024,S37000018
+S241H,Bonnyrigg Day Centre,EH22 4RT,"Old Library, Bonnyrigg",S08000024,S37000018
+S243H,Ballenden House,EH8 9HL,"28/32 Howden Street, Edinburgh",S08000024,S37000012
+S305H,St Michael's Hospital,EH49 6QS,"Edinburgh Road, Linlithgow",S08000024,S37000030
+S306H,Tippethill Hospital,EH48 3BQ,"Bathgate, West Lothian",S08000024,S37000030
+S307H,Whitburn Day Hospital,EH47 0SD,"1 Weavers Lane, Whitburn",S08000024,S37000030
+S308H,St John's Hospital,EH54 6PP,"Howden West, Livingston, West Lothian",S08000024,S37000030
+S309H,Inchkeith House,EH6 8NP,"137 Leith Walk, Edinburgh",S08000024,S37000012
+S310H,Ferryfield House,EH5 2HF,"100 Pilton Drive, Edinburgh",S08000024,S37000012
+S311H,Bathgate House Day Hospital,EH48 4PJ,"15 North Bridge Street, Bathgate",S08000024,S37000030
+S312H,Learning Disabilities Service Healthcare Houses,EH10 5EZ,Lothian,S08000024,S37000012
+S313H,Ellen's Glen House,EH16 6FF,"72 Carnbee Avenue, Edinburgh",S08000024,S37000012
+S314H,Royal Infirmary of Edinburgh at Little France,EH16 4SA,"51 Little France Crescent, Old Dalkeith Road, Edinburgh",S08000024,S37000012
+S315H,Findlay House,EH6 7LG,"Seafield Street, Edinburgh",S08000024,S37000012
+S316H,Princess Alexandra Eye Pavilion,EH3 9HA,"45 Chalmers Street, Edinburgh",S08000024,S37000012
+S317H,Whitburn House,EH47 0DD,"12/14 The Avenue, Whitburn, Bathgate, West Lothian",S08000024,S37000030
+S318H,Midlothian Community Hospital,EH22 3ND,"70 Eskbank Road, Dalkeith, Midlothian",S08000024,S37000018
+S319H,Royal Hospital for Children and Young People,EH16 4TJ,"50 Little France Crescent, Edinburgh",S08000024,S37000012
+S320H,East Lothian Community Hospital,EH41 3PF,"Alderson Road, Haddington",S08000024,S37000010
+D101H,State Hospital,ML11 8RP,Carstairs,SB0802,NA
+D102H,Golden Jubilee National Hospital,G81 4DY,"Agamemnon Street, Clydebank",SB0801,NA
+R103H,The Balfour,KW15 1NZ,"Foreland Road, Kirkwall, Orkney",S08000025,S37000022
+Z102H,Gilbert Bain Hospital,ZE1 0TB,"Lerwick, Shetland",S08000026,S37000026
+T101H,Ninewells Hospital,DD1 9SY,Dundee,S08000030,S37000007
+T104H,Kings Cross Hospital,DD3 8EA,"Clepington Road, Dundee",S08000030,S37000007
+T107H,Royal Victoria Hospital,DD2 1SP,"Jedburgh Road, Dundee",S08000030,S37000007
+T113H,Dundee Dental Hospital,DD1 4HR,"2 Park Place, Dundee",S08000030,S37000007
+T115H,Strathmartine Hospital,DD3 0PG,"Strathmartine, Dundee",S08000030,S37000003
+T116H,Armitstead Child Development Centre,DD3 8EA,"Kings Cross Hospital, Clepington Road, Dundee",S08000030,S37000007
+T120H,Hawkhill Day Hospital,DD1 5LB,"Peddie Street, Dundee",S08000030,S37000007
+T121H,Dundonald Centre,DD3 7PY,"Unit 9a Manhattan Works, Dundonald Street, Dundee",S08000030,S37000007
+T122H,Dudhope House (Young Persons Unit),DD3 6HH,"15 Dudhope Terrace, Dundee",S08000030,S37000007
+T123H,Royal Victoria Day Hospital,DD2 1SP,"Royal Victoria Hospital, Jedburgh Road, Dundee",S08000030,S37000007
+T202H,Perth Royal Infirmary,PH1 1NX,"Taymount Terrace, Perth",S08000030,S37000033
+T205H,St Margaret's Hospital,PH3 1JH,"Western Road, Auchterarder",S08000030,S37000033
+T207H,Aberfeldy Cottage Hospital,PH15 2DH,"Old Crieff Road, Aberfeldy",S08000030,S37000033
+T209H,Blairgowrie & Rattray Cottage Hospital,PH10 6EE,"Perth Road, Blairgowrie",S08000030,S37000033
+T215H,Murray Royal Hospital,PH2 7BH,"Muirhall Road, Perth",S08000030,S37000033
+T221H,Scone Day Hospital,PH2 6LE,"Birch Avenue, Scone",S08000030,S37000033
+T304H,Arbroath Infirmary,DD11 2AT,"Rosemount Road, Arbroath",S08000030,S37000003
+T305H,Brechin Infirmary,DD9 7AN,"Infirmary Street, Brechin",S08000030,S37000003
+T309H,Little Cairnie Hospital,DD11 3RA,"Forfar Road, Arbroath",S08000030,S37000003
+T310H,Montrose Royal Infirmary,DD10 8AJ,"Bridge Street, Montrose",S08000030,S37000003
+T312H,Stracathro Hospital,DD9 7QA,By Brechin,S08000030,S37000003
+T313H,Whitehills Hospital,DD8 3DY,By Forfar,S08000030,S37000003
+T314H,Gowanlea,DD11 5DX,"Seaton Road, Arbroath",S08000030,S37000003
+T316H,Crieff Community Hospital,PH7 3HR,"King Street, Crieff",S08000030,S37000033
+T317H,Carseview Centre,DD2 1NH,"4 Tom McDonald Avenue, Medipark, Dundee",S08000030,S37000007
+T319H,Whitehills Health and Community Care Centre,DD8 3DY,By Forfar,S08000030,S37000003
+T320H,Pitlochry Community Hospital,PH16 5FG,"Ferry Road, Pitlochry, Perthshire",S08000030,S37000033
+T321H,Perth Dental Hospital,PH1 1RA,"Broxden Business Park, Perth",S08000030,S37000033
+T322H,Kingsway Care Centre,DD2 3PT,"Kings Cross Road, Dundee",S08000030,S37000007
+T323H,Bluebell Intermediate Care Unit,DD2 5JB,"Riverside View Nursing Home, 60 Clovis Duveau Drive, Dundee",S08000030,S37000007
+T324H,Dudhope Young Peoples Inpatient Unit,DD3 6HH,"17 Dudhope Terrace, Dundee",S08000030,S37000007
+T325H,CAMHS Hospital Unit,DD3 6HH,"17 Dudhope Terrace, Dundee",S08000030,S37000007
+W106H,St Brendans Cot Hospital,HS9 5XE,"Horve, Isle of Barra",S08000028,S37000031
+W107H,Western Isles Hospital,HS1 2AF,"Macaulay Road, Stornoway, Isle of Lewis",S08000028,S37000031
+W108H,Uist & Barra Hospital,HS7 5LA,"Balivanich, Isle of Benbecula",S08000028,S37000031
