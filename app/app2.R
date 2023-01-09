@@ -6,6 +6,8 @@ as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
 
+hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
+
 #ui stuff
 
 sidebar <- dashboardSidebar(
@@ -46,7 +48,7 @@ body <- dashboardBody(
                             sidebarPanel(width = 3,
                                          fluidRow(selectInput(inputId = "findings_hb_input",
                                                               label = "Health Board",
-                                                              choices = sort(unique(hb_names$hb_name)))
+                                                              choices = hb_choices)
                                          ),
                                          
                                          fluidRow()
@@ -54,7 +56,7 @@ body <- dashboardBody(
                             
                             mainPanel(
                                 tabBox(id = "findings_tabs",
-                                       width = 9,
+                                       width = 13,
                                        tabPanel("Demographics",
                                                 plotOutput("demo_graph")),
                                        tabPanel("A&E",
