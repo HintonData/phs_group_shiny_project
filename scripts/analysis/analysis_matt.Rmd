@@ -1,0 +1,232 @@
+---
+title: "Demographics"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+## import and clean data
+```{r}
+# healthboards
+hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+
+hb_clean <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+shb_raw <- read_csv(here("data/raw_data/special_health_boards_and_national_facilities.csv")) %>% clean_names()
+
+shb_clean <- shb_raw %>% 
+    select(shb, shb_name) %>% 
+    rename(hb = shb, hb_name = shb_name)
+
+
+hb_joined <- rbind(hb_clean, shb_clean)
+
+write_csv(hb_joined, here("data/clean_data/hb_simple.csv"))
+```
+
+```{r}
+##Demographics Age & Sex
+as_demo_raw <- read_csv(here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")) %>% clean_names()
+
+
+as_demo_clean <- as_demo_raw %>% 
+    left_join(hb_joined, "hb") %>%
+    select(-ends_with("qf")) %>%
+    mutate(sex = factor(sex, c("Male", "Female")),
+           year = as.numeric(str_sub(quarter, 1, 4)),
+                    is_covid_year = case_when(
+           year <= 2019 ~ "Pre_Covid", # before covid
+           year >= 2020 ~ "Covid"), # 2020 Q1 + covid appears?
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+    filter(!is.na(is_covid_year))
+
+write_csv(as_demo_clean, here("data/clean_data/as_demo_clean"))
+```
+
+
+## graphs
+
+### Total admissions
+```{r}
+demo_totals <- as_demo_clean %>% 
+    mutate(
+        #remove Year from Quarter column
+        q = str_sub(quarter, -2, -1),
+        #create a factor
+        q = factor(
+            q,
+            levels = c("Q1", "Q2", "Q3", "Q4"),
+            ordered = TRUE
+        ),
+        year = yq(quarter),
+        year = year(year)
+    )
+
+demo_totals %>% 
+  group_by(quarter) %>% 
+  summarise(total_age_sex = sum(episodes)) %>% 
+  ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+  geom_line(colour = "steelblue") +
+  geom_point(colour = "steelblue") +
+  geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
+  geom_text(aes(x='2020Q1', label="\nCovid", y=1500000), colour="red", angle=90, text=element_text(size=11)) +
+  geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=1500000), colour="blue", angle=90, text=element_text(size=11))+
+  theme_classic() +
+  scale_y_continuous(labels = scales::comma, 
+                     expand = c(0, 0),
+                     limits = c(0, NA)) +
+  labs(title = "Nationwide Hospital Attendances (Scotland)",
+       y = "Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+## Proportions of Gender (pre & during covid)
+```{r}
+total_sex <- as_demo_clean %>% 
+  group_by(is_covid_year) %>% 
+  summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>% 
+  group_by(is_covid_year, sex) %>% 
+  summarise(sum_episodes = sum(episodes)) %>% 
+  left_join(total_sex, "is_covid_year") %>% 
+  mutate(proportion = sum_episodes / total_episodes,
+         is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+  ggplot(aes(x = is_covid_year, y = proportion, fill = sex,
+             label = scales::percent(proportion, accuracy = 0.1))) +
+  geom_col() +
+  #adds label to each column
+  geom_label(position = position_stack(vjust = 0.5), fill = "white") +
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Proportion of attendances by sex",
+       subtitle = "Pre-covid vs During Covid",
+       fill = "Sex")+
+  #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(face = "bold", 
+                                   size = 11, 
+                                   colour = "black"))
+```
+## Proportion Changes between genders and age groups (pre vs during covid)
+```{r}
+#get totals before covid and after covid (episodes)
+total_pre_covid <- as_demo_clean %>% 
+      group_by(is_covid_year) %>% 
+      summarise(total_episodes = sum(episodes))
+
+
+change_in_age <- as_demo_clean %>% 
+    group_by(is_covid_year, sex, age) %>%
+    summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_age_group = if_else(
+            is_covid_year == "Pre_Covid",
+            sum_episodes / total_episodes,
+            sum_episodes / total_episodes
+        )
+    ) %>%
+    #select relevant columns
+    select(-sum_episodes, -total_episodes) %>%
+    #pivot wider readability
+    pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
+    # get difference between covid & pre-covid numbers for graph
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid)
+
+#graph
+ggplot(change_in_age, aes(x = age, y = diff, fill = is_positive)) +
+  geom_col() +
+  geom_hline(yintercept = 0) +
+  geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+  scale_fill_brewer(palette = "Set1")+
+  labs(y = "Change (%)",
+       title = "Change in demographic proportions: Pre-Covid vs Covid")+
+  facet_wrap(~ sex, ncol = 1)+
+  theme_minimal()+
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(
+        size = 12, color = "black", face = "bold"
+        ),
+        strip.placement = "inside")
+```
+## Proportion Changes between admission type and gender (pre vs during covid)
+```{r}
+unique(as_demo_clean$admission_type)
+
+total_pre_covid_2 <- as_demo_clean %>% 
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year) %>% 
+  summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>%
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year, sex, admission_type) %>% 
+  summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid_2, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_diff = if_else(
+            is_covid_year == "Pre_Covid",
+            sum_episodes / total_episodes,
+            sum_episodes / total_episodes
+        )
+    ) %>%
+    #select relevant columns
+    select(-sum_episodes, -total_episodes) %>%
+    #pivot wider readability
+    pivot_wider(names_from = is_covid_year, values_from = prop_diff) %>%
+    # get difference between covid & pre-covid numbers for graph
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid) %>%
+    ggplot(aes(x = admission_type, y = diff, fill = is_positive)) +
+    geom_col() +
+    geom_hline(yintercept = 0) +
+    geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+    scale_fill_brewer(palette = "Set1")+
+    labs(y = "Change (%)",
+       title = "Change in demographic proportions: Pre-Covid vs Covid")+
+    facet_wrap(~ sex, ncol = 1)+
+    theme_minimal()+
+    theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(
+        size = 12, color = "black", face = "bold"
+        ),
+        strip.placement = "inside")
+```

@@ -1,0 +1,90 @@
+---
+title: "Project Description Outline"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Names of group members
+
+Andrew Wyllie
+Ben Hinton
+Matthew Marr
+
+
+### Roles & responsibilities of each member
+
+**Everyone** worked on ....
+
+**Person 1** worked on ....
+
+**Person 2** worked on ....
+
+**Person 3** worked on ....
+
+
+### Brief description of dashboard topic
+
+Our dashboard contains ...
+
+Our topic is ...
+
+The dashboard outlines our topic in terms of ...
+
+### Stages of the project
+
+* Planning & dashboard wireframe
+* Git branching & version control
+* Choosing datasets
+* Data exploration, cleaning & analysis
+* Identifying graphs to use
+* Creating Dashboard
+* Presentation and report
+
+
+### Which tools were used in the project
+
+* Zoom (daily stand-ups and occasional mob programming)
+* Git/GitHub (collaboration & version control)
+* Slack (Communications & collaboration)
+* Google Docs
+* R studio
+
+
+### How did you gather and synthesise requirements for the project?
+
+We initially started by analyzing the data to specifically identify and spot any trends,
+using data visualization techniques.
+
+### Motivations for using the data you have chosen
+
+We used the specific datasets on hospital performance across Scotland to answer 'To what extent are the ‘winter crises’ reported by the media real?' and 'How has the Covid-19 pandemic affected provision of acute care in Scotland?'
+
+### Data quality and potential bias, including a brief summary of data cleaning and transformations
+
+According to the About tab on the dataset page/dedicated page online, the data quality is good. It meets a high standard of data quality, due to this data being used specifically in National Statistics publications, which have to conform to the highest standards of trustworthiness, quality and public value.
+
+The dataset contains no personal information, however the lengths of the data stored vary for example some years are shorter than others. This could potentially skew our analysis to be biased.
+
+The datasets don't provide any information about mortality of the virus, so we are unable to make a full understanding of true impact of the deadly virus. However this is understandable due to this data being very sensitive to loved ones, and could potentially be misused if they where to be fully released, alongside the current information available.
+
+To clean the datasets we picked out only information we requried for our analysis.
+
+### How is the data stored and structured
+
+The data is in the form of linked data. Any data point contains a linked dataset should have a unique identifiable URL.
+
+This means data point can be viewed using a web browser and can be referenced by other linked datasets.
+
+Benefits of storing the data like this makes it highly convenient to connect multiple datasets together, to get a more robust view of all the data
+
+### Ethical and legal considerations of the data
+
+There are no ethical considerations, because the data is aggregated in a specific way that anonymize individuals, to remove any possible way to identify specific individuals from the data.
+
+The datasets are covered by the Open Government License, which means that anyone can use the dataset as long as they acknowledge the source.
