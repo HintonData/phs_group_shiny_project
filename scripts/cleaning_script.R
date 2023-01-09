@@ -42,5 +42,29 @@ as_demo_clean <- as_demo_raw %>%
 write_csv(as_demo_clean, here("data/clean_data/as_demo_clean"))
 
 ##
+ae_activity_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% 
+    clean_names()
 
+beds_raw <- read_csv(here("data/raw_data/beds_by_nhs_board_of_treatment_and_specialty.csv")) %>% 
+    clean_names()
+
+ae_activity_clean <- ae_activity_raw %>% 
+    select(-country) %>% 
+    separate(col = month, into = c("year", "month"), sep = 4) %>% 
+    left_join(codes_hb, by = c("hbt" = "hb"))  %>% 
+    left_join(codes_hospitals, by = c("treatment_location" = "location")) %>% 
+    relocate(hb_name, .after = hbt) %>% 
+    relocate(location_name, .after = treatment_location) %>%
+    filter(between(as.numeric(year), 2017, 2022))
+
+beds_clean <- beds_raw %>% 
+    left_join(codes_hb, by = "hb") %>% 
+    left_join(codes_hospitals, by = "location") %>% 
+    filter(hb != location) %>% 
+    mutate(yq = as.factor(quarter)) %>% 
+    separate(col = quarter, into = c("year", "quarter"), sep = 4) %>% 
+    mutate(quarter = str_remove(quarter, "Q")) %>% 
+    relocate(hb_name, .after = hb) %>% 
+    relocate(location_name, .after = location) %>% 
+    filter(between(as.numeric(year), 2017, 2022))
 ##
