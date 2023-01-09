@@ -4,6 +4,7 @@ library(here)
 
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
+ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
 
 #ui stuff
 
@@ -52,15 +53,20 @@ body <- dashboardBody(
                             ),
                             
                             mainPanel(
-                                plotOutput("demo_graph")))
-                ),
+                                tabBox(id = "findings_tabs",
+                                       width = 9,
+                                       tabPanel("Demographics",
+                                                plotOutput("demo_graph")),
+                                       tabPanel("A&E",
+                                                plotOutput("ae_attendance")))
+                )),
                 
                 tabItem(tabName = "data_view",
                         
                 )
         )
     )
-
+)
 # UI
 ui <- dashboardPage(
     skin = "blue",
@@ -108,6 +114,42 @@ server <- function(input, output, session) {
                   legend.position = "none")
         
         
+        
+    })
+    
+    output$ae_attendance <- renderPlot({
+        
+        if (input$findings_hb_input != "All"){
+            
+            ae_activity %>% 
+                filter(hb_name == input$findings_hb_input) %>% 
+                group_by(hb_name, year, month) %>% 
+                summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
+                ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
+                geom_point(aes(group = hb_name)) +
+                geom_line(aes(group = hb_name)) +
+                theme(legend.position = "bottom", legend.title = element_blank()) +
+                ggtitle(case_when(
+                    input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance per Month",
+                    TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance per Month"))) +
+                scale_y_continuous(labels = scales::label_comma()) +
+                guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+                facet_wrap(~year, scales = "free_x")
+        }
+        
+        else {
+            ae_activity %>% 
+                group_by(year, month) %>% 
+                summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
+                ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
+                geom_point(aes(group = 1)) +
+                geom_line(aes(group = 1)) +
+                theme(legend.position = "bottom", legend.title = element_blank()) +
+                ggtitle("NHS Scotland Aggregate A&E Attendance per Month") +
+                scale_y_continuous(labels = scales::label_comma()) +
+                guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+                facet_wrap(~year, scales = "free_x")
+        }
         
     })
 }
