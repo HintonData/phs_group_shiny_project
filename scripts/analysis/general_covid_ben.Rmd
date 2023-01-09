@@ -26,11 +26,13 @@ hospital_clean <- hospitals %>%
 ```
 
 ```{r}
+covid_impacts <- read_csv(here("data/raw_data/covid_wider_impacts.csv"))
+
 covid_impacts <- covid_impacts %>% 
     clean_names() %>% 
     left_join(hb_clean)
 
-
+write_csv(here("data/clean_data", file = "covid_impacts_clean"))
 ```
 
 ```{r}
