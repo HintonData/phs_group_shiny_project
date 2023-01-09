@@ -57,6 +57,8 @@ ae_activity_clean <- ae_activity_raw %>%
     relocate(location_name, .after = treatment_location) %>%
     filter(between(as.numeric(year), 2017, 2022))
 
+write_csv(ae_activity_clean, here("data/clean_data/ae_activity_clean.csv"))
+
 beds_clean <- beds_raw %>% 
     left_join(codes_hb, by = "hb") %>% 
     left_join(codes_hospitals, by = "location") %>% 
@@ -67,7 +69,15 @@ beds_clean <- beds_raw %>%
     relocate(hb_name, .after = hb) %>% 
     relocate(location_name, .after = location) %>% 
     filter(between(as.numeric(year), 2017, 2022))
+<<<<<<< HEAD
 ##
+
+=======
+
+write_csv(beds_clean, here("data/clean_data/beds_clean.csv"))
+##
+>>>>>>> 5214ea273546416b29f0f3d007da0a5af4c78de5
+
 
 covid_impacts <- read_csv(here("data/raw_data/covid_wider_impacts.csv"))
 
@@ -76,3 +86,4 @@ covid_impacts <- covid_impacts %>%
     left_join(hb_clean)
 
 write_csv(here("data/clean_data", file = "covid_impacts_clean"))
+
