@@ -49,7 +49,7 @@ as_demo_clean <- as_demo_raw %>%
            is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
     filter(!is.na(is_covid_year))
 
-write_csv(as_demo_clean, here("data/clean_data/as_demo_clean"))
+write_csv(as_demo_clean, here("data/clean_data/as_demo_clean.csv"))
 
 ##A&E and Beds
 ae_activity_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% 

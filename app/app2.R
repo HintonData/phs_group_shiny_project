@@ -1,5 +1,9 @@
 library(shinydashboard)
 library(tidyverse)
+library(here)
+
+as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
+hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
 
 #ui stuff
 
@@ -15,7 +19,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     tabItems(
         tabItem(tabName = "overview",
-                h2("Overview"),
+                h1("Overview"),
                 p(
                     "Since the start of the pandemic, NHS Scotland has had to adjust and adapt to unforeseen and changing circumstances on a continual basis to meet the ever changing demand and challenges facing it. While the pandemic has been an unforeseen pressure, one predictable pressure is the winter period and effect it has on unscheduled care and subsequent capacity and demand on hospital services in the NHS."
                 ),
@@ -25,27 +29,37 @@ body <- dashboardBody(
                 ),
                 
                 p(
-                    "We would like you to create a dashboard using R-Shiny and PHS open data on secondary care to investigate what has been happening from 2020 onwards in the acute hospital sector. We would like you to use the data and visualisations in your dashboard to tell the story of and weave your narrative of the pandemic and its impact on the secondary care sector in NHS Scotland."
+                    "We have created a dashboard using R-Shiny and data from Public Health Scotland on secondary care to investigate what has been happening from 2020 onwards in the acute hospital sector. Using visualisations we will show our narrative of how the NHS coped during the pandemic."
                 ),
                 
                 p(
-                    "More specifically, we would like to consider the impact that winter may have on health care, primarily the hospital (acute care) sector and try to answer both of the following questions;"
+                    "We have focused on the impact of winter on health care, mainly the hospital (acute care) sector and specifically these questions:"
                 ),
                 
-                p(b("1. To what extent are the 'winter crises' reported by the media real?"),
-                p(b("2. How has the Covid-19 pandemic affected provision of acute care in Scotland?"))
-        ),
-        
-        tabItem(tabName = "findings",
+                p("1. To what extent are the 'winter crises' reported by the media real?"),
+                p("2. How has the Covid-19 pandemic affected provision of acute care in Scotland?")),
                 
-        ),
-        
-        tabItem(tabName = "data_view",
+                tabItem(tabName = "findings",
+                        
+                        sidebarLayout(
+                            sidebarPanel(width = 3,
+                                         fluidRow(selectInput(inputId = "findings_hb_input",
+                                                              label = "Health Board",
+                                                              choices = sort(unique(hb_names$hb_name)))
+                                         ),
+                                         
+                                         fluidRow()
+                            ),
+                            
+                            mainPanel(
+                                plotOutput("demo_graph")))
+                ),
                 
+                tabItem(tabName = "data_view",
+                        
+                )
         )
     )
-)
-
 
 # UI
 ui <- dashboardPage(
@@ -57,7 +71,45 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
     
-    
+    output$demo_graph <- renderPlot({
+        
+        demo_totals <- as_demo_clean %>% 
+            mutate(
+                #remove Year from Quarter column
+                q = str_sub(quarter, -2, -1),
+                #create a factor
+                q = factor(
+                    q,
+                    levels = c("Q1", "Q2", "Q3", "Q4"),
+                    ordered = TRUE
+                ),
+                year = yq(quarter),
+                year = year(year)
+            )
+        
+        demo_totals %>% 
+            filter(hb_name == input$findings_hb_input) %>% 
+            group_by(quarter) %>% 
+            summarise(total_age_sex = sum(episodes)) %>% 
+            ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+            geom_line(colour = "steelblue") +
+            geom_point(colour = "steelblue") +
+            geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
+            geom_text(aes(x='2020Q1', label="\nCovid", y=1500000), colour="red", angle=90, text=element_text(size=11)) +
+            geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=1500000), colour="blue", angle=90, text=element_text(size=11))+
+            theme_classic() +
+            scale_y_continuous(labels = scales::comma, 
+                               expand = c(0, 0),
+                               limits = c(0, NA)) +
+            labs(title = "Nationwide Hospital Attendances (Scotland)",
+                 y = "Hospital Attendances") +
+            theme(axis.title.x = element_blank(),
+                  axis.text.x = element_text(angle = 45, hjust = 1),
+                  legend.position = "none")
+        
+        
+        
+    })
 }
 
 shinyApp(ui, server)
