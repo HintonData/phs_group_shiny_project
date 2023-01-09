@@ -230,3 +230,51 @@ as_demo_clean %>%
         ),
         strip.placement = "inside")
 ```
+# map TEST
+```{r}
+library(sf)
+library(plotly)
+
+health_board_map <- st_read(dsn = here("data/raw_data/"),
+                                       layer = "sg_nhs_health_boards") %>% 
+  clean_names()
+
+health_board_map %>% 
+  #improve app performance (simplify number of points in map)
+  st_simplify(dTolerance = 1000) %>% 
+  st_cast("MULTIPOLYGON") %>% 
+  st_write(dsn = here("data/clean_data/"),
+           layer = "health_board_map_simple",
+           driver = "ESRI Shapefile")
+
+health_board_map %>%     
+ggplot() +
+  geom_sf(aes(fill = hb_name)) +
+  theme_void() +
+  theme(legend.position = "right")
+
+```
+
+```{r}
+p <- health_board_map %>%
+  ggplot(aes(text = hb_name)) +
+  geom_sf(fill = "gray90",
+          col = "gray40",
+          size = 0.1) +
+  geom_sf(
+    data = health_board_map,
+    #filter here?
+    fill = "steelblue",
+    size = 0.1,
+    colour = "white"
+  ) +
+  theme_void()
+    
+ggplotly(p, tooltip = "text") %>%
+  config(
+    scrollZoom = TRUE,
+    displayModeBar = F,
+    showAxisDragHandles = F
+  )
+```
+

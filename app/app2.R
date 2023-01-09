@@ -4,6 +4,13 @@ library(here)
 library(leaflet)
 library(lubridate)
 
+#map test
+library(sf)
+library(plotly)
+
+health_board_map <- st_read(dsn = here("data/clean_data/"),
+                            layer = "health_board_map_simple")
+
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
@@ -49,12 +56,12 @@ body <- dashboardBody(
                         
                         sidebarLayout(
                             sidebarPanel(width = 3,
-                                         fluidRow(selectInput(inputId = "findings_hb_input",
+                                         fluidRow(column(12,selectInput(inputId = "findings_hb_input",
                                                               label = "Health Board",
-                                                              choices = hb_choices)
+                                                              choices = hb_choices))
                                          ),
                                          
-                                         fluidRow(leafletOutput("findings_minimap"))
+                                         fluidRow(column(12,plotlyOutput("hb_map", height = "300px")))
                             ),
                             
                             mainPanel(
@@ -107,6 +114,27 @@ server <- function(input, output, session) {
         }
     })
     
+    output$hb_map <- renderPlotly({
+        
+        p <- health_board_map %>%
+            ggplot(aes(text = hb_name)) +
+            geom_sf(fill = "gray90", col = "gray40", size = 0.1) +
+            geom_sf(data = health_board_map,
+                    fill = "orange", size = 0.1, colour = "white") +
+            theme_void()
+        
+        if(input$findings_hb_input != "All"){
+            p <- health_board_map %>%
+                ggplot(aes(text = hb_name)) +
+                geom_sf(fill = "gray90", col = "gray40", size = 0.1) +
+                geom_sf(data = health_board_map %>% filter(hb_name == input$findings_hb_input),
+                        fill = "steelblue", size = 0.1, colour = "white") +
+                theme_void()
+        }
+        
+        ggplotly(p,
+                 tooltip = "text")
+    })
     
     output$demo_graph <- renderPlot({
         
