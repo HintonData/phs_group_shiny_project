@@ -120,7 +120,7 @@ as_demo_clean %>%
                                    size = 11, 
                                    colour = "black"))
 ```
-
+## Proportion Changes between genders and age groups (pre vs during covid)
 ```{r}
 #get totals before covid and after covid (episodes)
 total_pre_covid <- as_demo_clean %>% 
@@ -175,4 +175,58 @@ ggplot(change_in_age, aes(x = age, y = diff, fill = is_positive)) +
         ),
         strip.placement = "inside")
 ```
+## Proportion Changes between admission type and gender (pre vs during covid)
+```{r}
+unique(as_demo_clean$admission_type)
 
+total_pre_covid_2 <- as_demo_clean %>% 
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year) %>% 
+  summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>%
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year, sex, admission_type) %>% 
+  summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid_2, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_diff = if_else(
+            is_covid_year == "Pre_Covid",
+            sum_episodes / total_episodes,
+            sum_episodes / total_episodes
+        )
+    ) %>%
+    #select relevant columns
+    select(-sum_episodes, -total_episodes) %>%
+    #pivot wider readability
+    pivot_wider(names_from = is_covid_year, values_from = prop_diff) %>%
+    # get difference between covid & pre-covid numbers for graph
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid) %>%
+    ggplot(aes(x = admission_type, y = diff, fill = is_positive)) +
+    geom_col() +
+    geom_hline(yintercept = 0) +
+    geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+    scale_fill_brewer(palette = "Set1")+
+    labs(y = "Change (%)",
+       title = "Change in demographic proportions: Pre-Covid vs Covid")+
+    facet_wrap(~ sex, ncol = 1)+
+    theme_minimal()+
+    theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(
+        size = 12, color = "black", face = "bold"
+        ),
+        strip.placement = "inside")
+```
