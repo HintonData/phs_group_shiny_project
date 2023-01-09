@@ -69,15 +69,10 @@ beds_clean <- beds_raw %>%
     relocate(hb_name, .after = hb) %>% 
     relocate(location_name, .after = location) %>% 
     filter(between(as.numeric(year), 2017, 2022))
-<<<<<<< HEAD
-##
-
-=======
 
 write_csv(beds_clean, here("data/clean_data/beds_clean.csv"))
-##
->>>>>>> 5214ea273546416b29f0f3d007da0a5af4c78de5
 
+## COVID Impacts
 
 covid_impacts <- read_csv(here("data/raw_data/covid_wider_impacts.csv"))
 
@@ -85,5 +80,5 @@ covid_impacts <- covid_impacts %>%
     clean_names() %>% 
     left_join(hb_clean)
 
-write_csv(here("data/clean_data", file = "covid_impacts_clean"))
+write_csv(here("data/clean_data", file = "covid_impacts_clean.csv"))
 
