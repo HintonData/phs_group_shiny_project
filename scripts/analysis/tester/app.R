@@ -19,6 +19,9 @@ ui <- fluidPage(
     ),
     
     fluidRow(plotlyOutput("beds")
+    ),
+    
+    fluidRow(plotlyOutput("beds2")
     )
 )
 
@@ -76,6 +79,28 @@ server <- function(input, output) {
                      scale_y_continuous(labels = scales::label_comma()) +
                      theme(legend.position = "bottom"))
         
+    })
+    
+    output$beds2 <- renderPlotly({
+        
+        ggplotly(beds %>%
+        group_by(yq, specialty_name) %>% 
+        summarise(all_staffed_beddays = sum(all_staffed_beddays),
+                  total_occupied_beddays = sum(total_occupied_beddays),
+                  percentage_occupancy = mean(percentage_occupancy, na.rm = TRUE)) %>% 
+        ggplot(aes(x = yq)) +
+        geom_point(aes(y = percentage_occupancy, group = specialty_name, colour = specialty_name)) +
+        geom_line(aes(y = percentage_occupancy, group = specialty_name, colour = specialty_name)) +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+        geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+        scale_y_continuous(labels = scales::label_comma()) +
+        labs(y = "Occupancy %",
+             x = "Year, Quarter") +
+        theme(axis.text.x = element_text(angle = 90),
+              legend.position = "hidden"))
     })
     
 }

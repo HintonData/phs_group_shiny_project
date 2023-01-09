@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r libraries}
 library(tidyverse)
+library(lubridate)
 ```
 
 ```{r data}
@@ -46,6 +47,13 @@ ae_activity <- ae_activity_raw %>%
 
 beds_raw <- read_csv(here::here("data/raw_data/beds_by_nhs_board_of_treatment_and_specialty.csv")) %>% 
     janitor::clean_names()
+
+ae_covid_raw <- read_csv(here::here("data/raw_data/a_and_e_hb_agesex_20221207.csv")) %>% 
+    janitor::clean_names()
+
+ae_covid <- ae_covid_raw %>% 
+    left_join(codes_hb, by = "hb") %>% 
+    relocate(hb_name, .after = hb)
 ```
 
 ```{r AE Graph and simulate filter}
@@ -94,7 +102,8 @@ beds <- beds_raw %>%
     left_join(codes_hb, by = "hb") %>% 
     left_join(codes_hospitals, by = "location") %>% 
     filter(hb != location) %>% 
-    mutate(yq = as.factor(quarter)) %>% 
+    mutate(yq = as.factor(quarter),
+           hb_name = iconv(hb_name, "latin1", "ASCII", sub=" ")) %>% 
     separate(col = quarter, into = c("year", "quarter"), sep = 4) %>% 
     mutate(quarter = str_remove(quarter, "Q")) %>% 
     relocate(hb_name, .after = hb) %>% 
@@ -108,12 +117,24 @@ beds %>%
     summarise(all_staffed_beddays = sum(all_staffed_beddays),
               total_occupied_beddays = sum(total_occupied_beddays),
               empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+    mutate(diff = case_when(
+        yq == "2017Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2018Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2018Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2019Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2019Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2020Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2020Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2021Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        yq == "2021Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+        TRUE ~ NA_real_)) %>% 
     ggplot(aes(x = yq)) +
     geom_point(aes(y = all_staffed_beddays, group = 1)) +
     geom_line(aes(y = all_staffed_beddays,group = 1, colour = all_staffed_beddays), colour = "green") +
     geom_point(aes(y = total_occupied_beddays, group = 1)) +
     geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1), colour = "red") +
     geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+    geom_text(aes(y = 4500000, x = yq, label = diff)) +
     geom_vline(xintercept = "2017Q3", linetype = "dashed") +
     geom_vline(xintercept = "2018Q1", linetype = "dashed") +
     geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
@@ -205,4 +226,58 @@ beds %>%
          x = "Year, Quarter") +
     theme(axis.text.x = element_text(angle = 90))
 ```
+
+```{r}
+ae_covid %>% 
+    mutate(week_ending = ymd(week_ending)) %>% 
+    group_by(week_ending, age_group) %>% 
+    summarise(percent_variation = mean(percent_variation)) %>% 
+    ggplot(aes(week_ending, percent_variation)) +
+    geom_col() +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    facet_wrap(~ age_group, scale = "free")
+```
+
+```{r}
+ae_covid %>% 
+    mutate(week_ending = ymd(week_ending)) %>% 
+    select(age_group, sex) %>% 
+    group_by(age_group, sex) %>% 
+    distinct()
+```
+
+```{r}
+beds %>% 
+    select(specialty_name) %>% 
+    distinct()
+```
+
+```{r}
+beds %>%
+    group_by(yq, specialty_name) %>% 
+    summarise(all_staffed_beddays = sum(all_staffed_beddays),
+              total_occupied_beddays = sum(total_occupied_beddays),
+              percentage_occupancy = mean(percentage_occupancy, na.rm = TRUE)) %>% 
+    ggplot(aes(x = yq)) +
+    geom_point(aes(y = percentage_occupancy)) +
+    geom_line(aes(y = percentage_occupancy, group = specialty_name, colour = specialty_name)) +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(percentage_occupancy), ymax = Inf), alpha = 0.005) +
+    scale_y_continuous(labels = scales::label_comma()) +
+    labs(y = "Occupancy %",
+         x = "Year, Quarter") +
+    theme(axis.text.x = element_text(angle = 90),
+          legend.position = "hidden")
+```
+
+```{r}
+beds 
+```
+
+
+
+
 
