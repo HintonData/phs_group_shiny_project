@@ -24,6 +24,16 @@ hb_joined <- rbind(hb_clean, shb_clean)
 
 write_csv(hb_joined, here("data/clean_data/hb_simple.csv"))
 
+##hospitals
+
+hsp_raw <- read_csv(here("data/raw_data/hospital_data.csv")) %>% 
+    clean_names()
+
+hsp_clean <- hsp_raw %>% 
+    select(location, location_name, postcode, address_line, hb, hscp)
+
+write_csv(hsp_clean, here("data/clean_data/hsp.csv"))
+
 ##Demographics Age & Sex
 as_demo_raw <- read_csv(here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")) %>% clean_names()
 
@@ -51,8 +61,9 @@ beds_raw <- read_csv(here("data/raw_data/beds_by_nhs_board_of_treatment_and_spec
 ae_activity_clean <- ae_activity_raw %>% 
     select(-country) %>% 
     separate(col = month, into = c("year", "month"), sep = 4) %>% 
-    left_join(codes_hb, by = c("hbt" = "hb"))  %>% 
-    left_join(codes_hospitals, by = c("treatment_location" = "location")) %>% 
+    left_join(hb_joined, by = c("hbt" = "hb"))  %>% 
+    left_join(hsp_clean %>% 
+                  select(location, location_name), by = c("treatment_location" = "location")) %>% 
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
     filter(between(as.numeric(year), 2017, 2022))
@@ -60,8 +71,9 @@ ae_activity_clean <- ae_activity_raw %>%
 write_csv(ae_activity_clean, here("data/clean_data/ae_activity_clean.csv"))
 
 beds_clean <- beds_raw %>% 
-    left_join(codes_hb, by = "hb") %>% 
-    left_join(codes_hospitals, by = "location") %>% 
+    left_join(hb_joined, by = "hb") %>% 
+    left_join(hsp_clean %>% 
+                  select(location, location_name), by = "location") %>% 
     filter(hb != location) %>% 
     mutate(yq = as.factor(quarter)) %>% 
     separate(col = quarter, into = c("year", "quarter"), sep = 4) %>% 
