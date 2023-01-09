@@ -32,8 +32,8 @@ body <- dashboardBody(
                     "More specifically, we would like to consider the impact that winter may have on health care, primarily the hospital (acute care) sector and try to answer both of the following questions;"
                 ),
                 
-                p("1. To what extent are the 'winter crises' reported by the media real?"),
-                p("2. How has the Covid-19 pandemic affected provision of acute care in Scotland?")
+                p(b("1. To what extent are the 'winter crises' reported by the media real?"),
+                p(b("2. How has the Covid-19 pandemic affected provision of acute care in Scotland?"))
         ),
         
         tabItem(tabName = "findings",
