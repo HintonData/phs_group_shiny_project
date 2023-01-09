@@ -6,6 +6,7 @@ library(leaflet)
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
+covid_impacts <- read_csv(here("data/clean_data/covid_impacts_clean.csv"))
 
 hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
 
@@ -60,8 +61,14 @@ body <- dashboardBody(
                                        width = 13,
                                        tabPanel("Demographics",
                                                 plotOutput("demo_graph")),
+                                       
                                        tabPanel("A&E",
-                                                plotOutput("ae_attendance")))
+                                                plotOutput("ae_attendance")),
+                                       
+                                       tabPanel("Covid Impacts",
+                                                plotOutput("covid_graph"))
+                                       
+                                       )
                 )),
                 
                 tabItem(tabName = "data_view",
@@ -154,6 +161,18 @@ server <- function(input, output, session) {
                 facet_wrap(~year, scales = "free_x")
         }
         
+    })
+    
+    output$covid_graph <- renderPlot({
+        
+        covid_impacts %>%
+            mutate(week_ending = ymd(week_ending)) %>% 
+            group_by(week_ending) %>% 
+            filter(sex == "All") %>% 
+            summarise(sum_admissions = sum(number_admissions)) %>% 
+            ggplot() +
+            aes(x = week_ending, y = sum_admissions) +
+            geom_line()
     })
     
     output$findings_minimap <- renderLeaflet({
