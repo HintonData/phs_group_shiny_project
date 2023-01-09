@@ -41,7 +41,7 @@ as_demo_clean <- as_demo_raw %>%
 
 write_csv(as_demo_clean, here("data/clean_data/as_demo_clean"))
 
-##
+##A&E and Beds
 ae_activity_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% 
     clean_names()
 
