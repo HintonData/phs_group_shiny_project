@@ -2,6 +2,7 @@ library(shinydashboard)
 library(tidyverse)
 library(here)
 library(leaflet)
+library(lubridate)
 
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
@@ -58,9 +59,18 @@ body <- dashboardBody(
                             
                             mainPanel(
                                 tabBox(id = "findings_tabs",
-                                       width = 13,
+                                       width = 12,
+                                      
                                        tabPanel("Demographics",
-                                                plotOutput("demo_graph")),
+                                                fluidRow(column(12, 
+                                                                plotOutput("demo_graph")
+                                                        )),
+                                                fluidRow(column(6,
+                                                            plotOutput("demo_graph_gender_prop")    
+                                                        ),
+                                                        column(6,plotOutput("demo_prop_change")
+                                                               ))
+                                                ),
                                        
                                        tabPanel("A&E",
                                                 plotOutput("ae_attendance")),
@@ -87,9 +97,20 @@ ui <- dashboardPage(
 
 server <- function(input, output, session) {
     
+    demo_clean <- reactive({
+        if (input$findings_hb_input != "All"){
+            as_demo_clean %>% filter(hb_name == input$findings_hb_input)
+        }
+        else
+        {
+            as_demo_clean
+        }
+    })
+    
+    
     output$demo_graph <- renderPlot({
         
-        demo_totals <- as_demo_clean %>% 
+        demo_totals <- demo_clean() %>% 
             mutate(
                 #remove Year from Quarter column
                 q = str_sub(quarter, -2, -1),
@@ -104,15 +125,11 @@ server <- function(input, output, session) {
             )
         
         demo_totals %>% 
-            filter(hb_name == input$findings_hb_input) %>% 
             group_by(quarter) %>% 
             summarise(total_age_sex = sum(episodes)) %>% 
             ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
             geom_line(colour = "steelblue") +
             geom_point(colour = "steelblue") +
-            geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
-            geom_text(aes(x='2020Q1', label="\nCovid", y=1500000), colour="red", angle=90, text=element_text(size=11)) +
-            geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=1500000), colour="blue", angle=90, text=element_text(size=11))+
             theme_classic() +
             scale_y_continuous(labels = scales::comma, 
                                expand = c(0, 0),
@@ -121,10 +138,99 @@ server <- function(input, output, session) {
                  y = "Hospital Attendances") +
             theme(axis.title.x = element_blank(),
                   axis.text.x = element_text(angle = 45, hjust = 1),
-                  legend.position = "none")
+                  legend.position = "none")+
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances (Scotland)",
+                TRUE ~ paste0("Hospital Attendances (NHS ", input$findings_hb_input, ")")))
         
+    })
+    
+    output$demo_graph_gender_prop <- renderPlot({
         
+        total_sex <- demo_clean() %>% 
+            group_by(is_covid_year) %>% 
+            summarise(total_episodes = sum(episodes))
         
+        demo_clean() %>% 
+            group_by(is_covid_year, sex) %>% 
+            summarise(sum_episodes = sum(episodes)) %>% 
+            left_join(total_sex, "is_covid_year") %>% 
+            mutate(proportion = sum_episodes / total_episodes,
+                   is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+            ggplot(aes(x = is_covid_year, y = proportion, fill = sex,
+                       label = scales::percent(proportion, accuracy = 0.1))) +
+            geom_col() +
+            #adds label to each column
+            geom_label(position = position_stack(vjust = 0.5), fill = "white") +
+            scale_fill_brewer(palette = "Dark2")+
+            labs(subtitle = "Pre-covid vs During Covid",
+                 fill = "Sex")+
+            #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
+            theme(panel.background = element_blank(),
+                  panel.grid = element_blank(),
+                  axis.line = element_blank(),
+                  axis.text.y = element_blank(),
+                  axis.title = element_blank(),
+                  axis.ticks = element_blank(),
+                  axis.text.x = element_text(face = "bold", 
+                                             size = 11, 
+                                             colour = "black"))+
+        ggtitle(case_when(
+            input$findings_hb_input == "All" ~ "Nationwide Proportion of attendances by sex (Scotland)",
+            TRUE ~ paste0("Proportion of attendances by sex (NHS ", input$findings_hb_input, ")")))
+    })
+    
+    output$demo_prop_change <- renderPlot({
+        total_pre_covid <- demo_clean() %>% 
+            group_by(is_covid_year) %>% 
+            summarise(total_episodes = sum(episodes))
+        
+        change_in_age <- demo_clean() %>% 
+            group_by(is_covid_year, sex, age) %>%
+            summarise(sum_episodes = sum(episodes)) %>%
+            left_join(total_pre_covid, by = "is_covid_year") %>%
+            mutate(
+                sex = factor(sex, c("Male", "Female")),
+                prop_age_group = if_else(
+                    is_covid_year == "Pre_Covid",
+                    sum_episodes / total_episodes,
+                    sum_episodes / total_episodes
+                )
+            ) %>%
+            select(-sum_episodes, -total_episodes) %>%
+            pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
+            mutate(diff = Covid - Pre_Covid,
+                   is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+            select(-Covid, -Pre_Covid)
+        
+        #graph
+        ggplot(change_in_age, aes(x = age, y = diff, fill = is_positive)) +
+            geom_col() +
+            geom_hline(yintercept = 0) +
+            geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+            scale_fill_brewer(palette = "Set1")+
+            labs(y = "Change (%)",
+                 title = "Change in demographic proportions: Pre-Covid vs Covid")+
+            facet_wrap(~ sex, ncol = 1)+
+            theme_minimal()+
+            theme(legend.position = "none",
+                  axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+                  axis.title.x = element_blank(),
+                  axis.line.x = element_blank(),
+                  axis.ticks.x = element_blank(),
+                  axis.line.y = element_blank(),
+                  axis.text.y = element_blank(),
+                  axis.ticks.y = element_blank(),
+                  axis.title.y = element_blank(),
+                  panel.background = element_blank(),
+                  panel.grid = element_blank(),
+                  strip.text.x = element_text(
+                      size = 12, color = "black", face = "bold"
+                  ),
+                  strip.placement = "inside")+
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Change in demographic proportions: Pre-Covid vs Covid",
+                TRUE ~ paste0("Change in demographic proportions: Pre-Covid vs Covid (NHS ", input$findings_hb_input, ") ")))
     })
     
     output$ae_attendance <- renderPlot({
