@@ -5,7 +5,7 @@ library(tidyverse)
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("Overview", tabName = "dashboard"),
+        menuItem("Overview", tabName = "overview"),
         menuItem("Findings", tabName = "findings"),
         menuItem("Data View", tabName = "data_view")
         
@@ -14,7 +14,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
     tabItems(
-        tabItem(tabName = "dashboard",
+        tabItem(tabName = "overview",
                 
         ),
         
