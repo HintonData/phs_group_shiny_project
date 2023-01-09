@@ -57,6 +57,8 @@ ae_activity_clean <- ae_activity_raw %>%
     relocate(location_name, .after = treatment_location) %>%
     filter(between(as.numeric(year), 2017, 2022))
 
+write_csv(ae_activity_clean, here("data/clean_data/ae_activity_clean.csv"))
+
 beds_clean <- beds_raw %>% 
     left_join(codes_hb, by = "hb") %>% 
     left_join(codes_hospitals, by = "location") %>% 
@@ -67,4 +69,6 @@ beds_clean <- beds_raw %>%
     relocate(hb_name, .after = hb) %>% 
     relocate(location_name, .after = location) %>% 
     filter(between(as.numeric(year), 2017, 2022))
+
+write_csv(beds_clean, here("data/clean_data/beds_clean.csv"))
 ##
