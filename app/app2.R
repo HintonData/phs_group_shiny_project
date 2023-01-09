@@ -1,6 +1,7 @@
 library(shinydashboard)
 library(tidyverse)
 library(here)
+library(leaflet)
 
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
@@ -51,7 +52,7 @@ body <- dashboardBody(
                                                               choices = hb_choices)
                                          ),
                                          
-                                         fluidRow()
+                                         fluidRow(leafletOutput("findings_minimap"))
                             ),
                             
                             mainPanel(
@@ -153,6 +154,12 @@ server <- function(input, output, session) {
                 facet_wrap(~year, scales = "free_x")
         }
         
+    })
+    
+    output$findings_minimap <- renderLeaflet({
+        
+        leaflet() %>% 
+            addTiles()
     })
 }
 
