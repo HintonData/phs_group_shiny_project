@@ -60,20 +60,10 @@ body <- dashboardBody(
                             sidebarPanel(width = 3,
                                          fluidRow(column(12,
                                                          
-                                                         conditionalPanel(
-                                                             condition = "input.findings_tabs == 'Demographics'
-                                                             | input.findings_tabs == 'Beds'",
                                                              selectInput(inputId = "findings_hb_input",
                                                               label = "Health Board",
-                                                              choices = hb_choices)),
-                                                         
-                                                         conditionalPanel(
-                                                             condition = "input.findings_tabs == 'A&E'
-                                                             | input.findings_tabs == 'Covid Impacts'
-                                                             | input.findings_tabs == 'Wait Times'",
-                                                             selectInput(inputId = "findings_hb_input2",
-                                                                         label = "Health Board 2",
-                                                                         choices = hb_choices_basic))
+                                                              choices = hb_choices_basic)
+
                                                          )
                                          ),
                                          
@@ -150,9 +140,9 @@ server <- function(input, output, session) {
     
     ae_reactive <- reactive({
         
-        if (input$findings_hb_input2 != "All"){
+        if (input$findings_hb_input != "All"){
             
-            ae_activity %>% filter(hb_name == input$findings_hb_input2)
+            ae_activity %>% filter(hb_name == input$findings_hb_input)
         }
         else
         {
@@ -161,8 +151,8 @@ server <- function(input, output, session) {
     })
     
     covid_clean <- reactive({
-        if (input$findings_hb_input2 != "All"){
-            covid_impacts %>% filter(hb_name == input$findings_hb_input2)
+        if (input$findings_hb_input != "All"){
+            covid_impacts %>% filter(hb_name == input$findings_hb_input)
         }
         else
         {
@@ -341,7 +331,7 @@ server <- function(input, output, session) {
 # a&e graphs -----------------------------------------------------------------    
     output$ae_attendance <- renderPlot({
         
-        if (input$findings_hb_input2 != "All"){
+        if (input$findings_hb_input != "All"){
             
             ae_reactive() %>% 
                 group_by(hb_name, year, month) %>% 
@@ -350,7 +340,7 @@ server <- function(input, output, session) {
                 geom_point(aes(group = hb_name), colour = "steelblue") +
                 geom_line(aes(group = hb_name), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
-                ggtitle(paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input2, ") ")) +
+                ggtitle(paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input, ") ")) +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
@@ -386,8 +376,8 @@ server <- function(input, output, session) {
             aes(x = week_ending, y = sum_admissions) +
             geom_line(colour = "steelblue")+
             ggtitle(case_when(
-                input$findings_hb_input2 == "All" ~ "Number of Covid Hostpial Admissions",
-                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input2, ") ")))+
+                input$findings_hb_input == "All" ~ "Number of Covid Hostpial Admissions",
+                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input, ") ")))+
             labs(y = "Number of Admissions",
                  x = "Week Ending")
     })
@@ -456,8 +446,8 @@ server <- function(input, output, session) {
         geom_col(fill = "green") +
         theme(legend.position = "bottom", legend.title = element_blank()) +
         ggtitle(case_when(
-            input$findings_hb_input2 == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
-            TRUE ~ paste0("NHS ", input$findings_hb_input2, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+            input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+            TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
         scale_y_continuous(labels = scales::label_comma()) +
         guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
         facet_wrap(~year, scales = "free_x")
