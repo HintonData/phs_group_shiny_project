@@ -352,7 +352,8 @@ server <- function(input, output, session) {
             ggtitle(case_when(
                 input$findings_hb_input == "All" ~ "Number of Covid Hostpial Admissions",
                 TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input, ") ")))+
-            labs(y = "Number of Admissions")
+            labs(y = "Number of Admissions",
+                 x = "Week Ending")
     })
     
 #page 3 (Datatables) -------------------------------------------------
