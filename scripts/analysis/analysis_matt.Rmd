@@ -387,3 +387,33 @@ waiting_times %>%
   geom_col(position = "dodge")
 ```
 
+```{r}
+wt_targets <- waiting_times %>%
+  group_by(is_covid_year) %>%
+  summarise(
+    attendance_sum = sum(total_attendances),
+    wait_target = sum(wait_lt_4hrs)
+  ) %>%
+  pivot_longer(wait_target, names_to = "wait_time", values_to = "value") %>%
+  mutate(proportion = value / attendance_sum) %>%
+  mutate(target = ifelse(proportion > 0.9, TRUE, FALSE),
+         x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid"))
+  
+  ggplot(wt_targets) +
+  geom_bar(aes(x = x_label, y = proportion, fill = target), stat = "identity",
+           position = "dodge")+
+  coord_flip()+
+  geom_hline(yintercept = 0.9, color = 'black', linetype="solid", size=1.5)+
+  theme(legend.position = "none",
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title.x = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.text.y = element_text(
+        size = 9, color = "black", face = "bold"
+        ))
+```
+
