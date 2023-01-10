@@ -3,13 +3,12 @@ library(tidyverse)
 library(here)
 library(leaflet)
 library(lubridate)
-
-#map test
 library(sf)
 library(plotly)
 
 health_board_map <- st_read(dsn = here("data/clean_data/"),
-                            layer = "health_board_map_simple")
+                            layer = "health_board_map_simple") %>% 
+                    st_transform("+proj=longlat +datum=WGS84")
 
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
@@ -61,7 +60,7 @@ body <- dashboardBody(
                                                               choices = hb_choices))
                                          ),
                                          
-                                         fluidRow(column(12,plotlyOutput("hb_map", height = "300px")))
+                                         fluidRow(column(12,leafletOutput("findings_minimap")))
                             ),
                             
                             mainPanel(
@@ -86,14 +85,23 @@ body <- dashboardBody(
                                                 plotOutput("covid_graph"))
                                        
                                        )
-                )),
+                ))),
                 
                 tabItem(tabName = "data_view",
-                        
+                        (tabBox(id = "data_view_tabs",
+                                width = 16,
+                                tabPanel("Demographics",
+                                         dataTableOutput("demo_table")),
+                                
+                                tabPanel("A&E",
+                                         dataTableOutput("ae_table")),
+                                
+                                tabPanel("Covid Impacts",
+                                         dataTableOutput("covid_table")))
+                        )
                 )
         )
     )
-)
 # UI
 ui <- dashboardPage(
     skin = "blue",
@@ -103,7 +111,8 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-    
+
+# reactive data ------------------------------------------------------   
     demo_clean <- reactive({
         if (input$findings_hb_input != "All"){
             as_demo_clean %>% filter(hb_name == input$findings_hb_input)
@@ -114,28 +123,57 @@ server <- function(input, output, session) {
         }
     })
     
-    output$hb_map <- renderPlotly({
-        
-        p <- health_board_map %>%
-            ggplot(aes(text = hb_name)) +
-            geom_sf(fill = "gray90", col = "gray40", size = 0.1) +
-            geom_sf(data = health_board_map,
-                    fill = "orange", size = 0.1, colour = "white") +
-            theme_void()
-        
-        if(input$findings_hb_input != "All"){
-            p <- health_board_map %>%
-                ggplot(aes(text = hb_name)) +
-                geom_sf(fill = "gray90", col = "gray40", size = 0.1) +
-                geom_sf(data = health_board_map %>% filter(hb_name == input$findings_hb_input),
-                        fill = "steelblue", size = 0.1, colour = "white") +
-                theme_void()
+    ae_clean <- reactive({
+        if (input$findings_hb_input != "All"){
+            ae_activity %>% filter(hb_name == input$findings_hb_input)
         }
-        
-        ggplotly(p,
-                 tooltip = "text")
+        else
+        {
+            ae_activity
+        }
     })
     
+    covid_clean <- reactive({
+        if (input$findings_hb_input != "All"){
+            covid_impacts %>% filter(hb_name == input$findings_hb_input)
+        }
+        else
+        {
+            covid_impacts
+        }
+    })
+  
+# map ---------------------------------------------------------------  
+    map_reactive <- reactive({
+        
+        leaflet(options = leafletOptions(zoomControl = FALSE,
+                                         attributionControl = FALSE,
+                                         dragging = FALSE,
+                                         tap = FALSE,
+                                         touchZoom = FALSE,
+                                         doubleClickZoom = FALSE,
+                                         keyboard = FALSE)) %>% 
+            addTiles()
+        
+    })
+    
+    output$findings_minimap <- renderLeaflet({
+        
+        if(input$findings_hb_input != "All"){
+            
+            map_reactive() %>% 
+                addPolygons(data = health_board_map %>% 
+                                filter(hb_name == input$findings_hb_input))
+        }
+        
+        else{
+            
+            map_reactive() %>% 
+                addPolygons(data = health_board_map)
+            
+        }})
+
+# demo graphs ----------------------------------------------------------------   
     output$demo_graph <- renderPlot({
         
         demo_totals <- demo_clean() %>% 
@@ -237,8 +275,7 @@ server <- function(input, output, session) {
             geom_hline(yintercept = 0) +
             geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
             scale_fill_brewer(palette = "Set1")+
-            labs(y = "Change (%)",
-                 title = "Change in demographic proportions: Pre-Covid vs Covid")+
+            labs(y = "Change (%)")+
             facet_wrap(~ sex, ncol = 1)+
             theme_minimal()+
             theme(legend.position = "none",
@@ -261,59 +298,86 @@ server <- function(input, output, session) {
                 TRUE ~ paste0("Change in demographic proportions: Pre-Covid vs Covid (NHS ", input$findings_hb_input, ") ")))
     })
     
+
+# a&e graphs -----------------------------------------------------------------    
     output$ae_attendance <- renderPlot({
         
         if (input$findings_hb_input != "All"){
             
-            ae_activity %>% 
+            ae_clean() %>% 
                 filter(hb_name == input$findings_hb_input) %>% 
                 group_by(hb_name, year, month) %>% 
                 summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
                 ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
-                geom_point(aes(group = hb_name)) +
-                geom_line(aes(group = hb_name)) +
+                geom_point(aes(group = hb_name), colour = "steelblue") +
+                geom_line(aes(group = hb_name), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
                 ggtitle(case_when(
                     input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance per Month",
-                    TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance per Month"))) +
+                    TRUE ~ paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input, ") "))) +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
-                facet_wrap(~year, scales = "free_x")
+                facet_wrap(~year, scales = "free_x")+
+                labs(y = "Number of attendences aggregate")
         }
         
         else {
-            ae_activity %>% 
+            ae_clean() %>% 
                 group_by(year, month) %>% 
                 summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
                 ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
-                geom_point(aes(group = 1)) +
-                geom_line(aes(group = 1)) +
+                geom_point(aes(group = 1), colour = "steelblue") +
+                geom_line(aes(group = 1), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
-                ggtitle("NHS Scotland Aggregate A&E Attendance per Month") +
+                ggtitle("NationwiAggregate A&E Attendance per Month (Scotland)") +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
-                facet_wrap(~year, scales = "free_x")
+                facet_wrap(~year, scales = "free_x")+
+                labs(y = "Number of attendences aggregate")
         }
         
     })
-    
+
+# covid graphs -------------------------------------------------------------
     output$covid_graph <- renderPlot({
         
-        covid_impacts %>%
+        covid_clean() %>%
             mutate(week_ending = ymd(week_ending)) %>% 
             group_by(week_ending) %>% 
             filter(sex == "All") %>% 
             summarise(sum_admissions = sum(number_admissions)) %>% 
             ggplot() +
             aes(x = week_ending, y = sum_admissions) +
-            geom_line()
+            geom_line(colour = "steelblue")+
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Number of Covid Hostpial Admissions",
+                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input, ") ")))+
+            labs(y = "Number of Admissions")
     })
     
-    output$findings_minimap <- renderLeaflet({
+#page 3 (Datatables) -------------------------------------------------
+    
+    output$demo_table <- renderDataTable(
         
-        leaflet() %>% 
-            addTiles()
-    })
+        as_demo_clean,
+        options = list(pageLength = 10)
+        
+    )
+    
+    output$ae_table <- renderDataTable(
+        
+        ae_activity,
+        options = list(pageLength = 10)
+        
+    )
+    
+    output$covid_table <- renderDataTable(
+        
+        covid_impacts,
+        options = list(pageLength = 10)
+        
+    )
+    
 }
 
 shinyApp(ui, server)
