@@ -14,6 +14,7 @@ as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
 covid_impacts <- read_csv(here("data/clean_data/covid_impacts_clean.csv"))
+beds <- read_csv(here("data/clean_data/beds_clean.csv"))
 
 hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
 
@@ -82,7 +83,10 @@ body <- dashboardBody(
                                                 plotOutput("ae_attendance")),
                                        
                                        tabPanel("Covid Impacts",
-                                                plotOutput("covid_graph"))
+                                                plotOutput("covid_graph")),
+                                       
+                                       tabPanel("Beds",
+                                                plotOutput("bed_occupancy"))
                                        
                                        )
                 ))),
@@ -97,7 +101,9 @@ body <- dashboardBody(
                                          dataTableOutput("ae_table")),
                                 
                                 tabPanel("Covid Impacts",
-                                         dataTableOutput("covid_table")))
+                                         dataTableOutput("covid_table")),
+                                tabPanel("Beds",
+                                         dataTableOutput("beds_table")))
                         )
                 )
         )
@@ -356,6 +362,54 @@ server <- function(input, output, session) {
                  x = "Week Ending")
     })
     
+# beds graphs --------------------------------------------------------------
+    
+    output$bed_occupancy <- renderPlot({
+        
+        beds %>% 
+        group_by(yq) %>% 
+        summarise(all_staffed_beddays = sum(all_staffed_beddays),
+                  total_occupied_beddays = sum(total_occupied_beddays),
+                  empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
+        mutate(diff = case_when(
+            yq == "2017Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2018Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2018Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2019Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2019Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2020Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2020Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2021Q2" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            yq == "2021Q4" ~ round(((lead(total_occupied_beddays) - lag(total_occupied_beddays, 1)) / lag(total_occupied_beddays, 1)), 4) * 100,
+            TRUE ~ NA_real_)) %>% 
+        ggplot(aes(x = yq)) +
+        geom_point(aes(y = all_staffed_beddays, group = 1)) +
+        geom_line(aes(y = all_staffed_beddays,group = 1, colour = all_staffed_beddays), colour = "green") +
+        geom_point(aes(y = total_occupied_beddays, group = 1)) +
+        geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1), colour = "red") +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_text(aes(y = 4500000, x = yq, label = diff)) +
+        geom_vline(xintercept = "2017Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2018Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2018Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2019Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2019Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2020Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2020Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2021Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2021Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+        scale_y_continuous(labels = scales::label_comma()) +
+        labs(y = "Number of Bed Days",
+             x = "Year, Quarter") +
+        theme(axis.text.x = element_text(angle = 90))
+        
+    })
+    
 #page 3 (Datatables) -------------------------------------------------
     
     output$demo_table <- renderDataTable(
@@ -377,6 +431,12 @@ server <- function(input, output, session) {
         covid_impacts,
         options = list(pageLength = 10)
         
+    )
+    
+    output$beds_table <- renderDataTable(
+        
+        beds,
+        options = list(pageLength = 10)
     )
     
 }
