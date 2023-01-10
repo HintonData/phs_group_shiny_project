@@ -86,7 +86,10 @@ body <- dashboardBody(
                                                 plotOutput("covid_graph")),
                                        
                                        tabPanel("Beds",
-                                                plotOutput("bed_occupancy"))
+                                                plotOutput("bed_occupancy")),
+                                       
+                                       tabPanel("Wait Times",
+                                                plotOutput("wait_overlay"))
                                        
                                        )
                 ))),
@@ -335,7 +338,7 @@ server <- function(input, output, session) {
                 geom_point(aes(group = 1), colour = "steelblue") +
                 geom_line(aes(group = 1), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
-                ggtitle("NationwiAggregate A&E Attendance per Month (Scotland)") +
+                ggtitle("Nationwide Aggregate A&E Attendance per Month (Scotland)") +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
@@ -409,6 +412,33 @@ server <- function(input, output, session) {
         theme(axis.text.x = element_text(angle = 90))
         
     })
+    
+# wait times graphs ------------------------------------------------------
+    
+    output$wait_overlay <- renderPlot({
+    
+    ae_activity %>% 
+        filter(hb_name == case_when(
+            input$findings_hb_input == "All" ~ hb_name,
+            TRUE ~ input$findings_hb_input)) %>% 
+        group_by(hb_name, year, month) %>% 
+        summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate),
+                  number_meeting_target_aggregate = sum(number_meeting_target_aggregate),
+                  attendance_greater8hrs = sum(attendance_greater8hrs),
+                  attendance_greater12hrs = sum(attendance_greater12hrs),
+                  .groups = "drop") %>% 
+        ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
+        geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
+        geom_col(fill = "green") +
+        theme(legend.position = "bottom", legend.title = element_blank()) +
+        ggtitle(case_when(
+            input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+            TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+        scale_y_continuous(labels = scales::label_comma()) +
+        guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
+        facet_wrap(~year, scales = "free_x")
+        
+        })
     
 #page 3 (Datatables) -------------------------------------------------
     
