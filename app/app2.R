@@ -12,11 +12,13 @@ health_board_map <- st_read(dsn = here("data/clean_data/"),
 
 as_demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 hb_names <- read_csv(here("data/clean_data/hb_simple.csv"))
+hb_names_basic <- read_csv(here("data/clean_data/hb_basic.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
 covid_impacts <- read_csv(here("data/clean_data/covid_impacts_clean.csv"))
 beds <- read_csv(here("data/clean_data/beds_clean.csv"))
 
 hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
+hb_choices_basic <- sort(append(unique(hb_names_basic$hb_name), "All"))
 
 #ui stuff
 
@@ -56,9 +58,23 @@ body <- dashboardBody(
                         
                         sidebarLayout(
                             sidebarPanel(width = 3,
-                                         fluidRow(column(12,selectInput(inputId = "findings_hb_input",
+                                         fluidRow(column(12,
+                                                         
+                                                         conditionalPanel(
+                                                             condition = "input.findings_tabs == 'Demographics'
+                                                             | input.findings_tabs == 'Beds'",
+                                                             selectInput(inputId = "findings_hb_input",
                                                               label = "Health Board",
-                                                              choices = hb_choices))
+                                                              choices = hb_choices)),
+                                                         
+                                                         conditionalPanel(
+                                                             condition = "input.findings_tabs == 'A&E'
+                                                             | input.findings_tabs == 'Covid Impacts'
+                                                             | input.findings_tabs == 'Wait Times'",
+                                                             selectInput(inputId = "findings_hb_input2",
+                                                                         label = "Health Board 2",
+                                                                         choices = hb_choices_basic))
+                                                         )
                                          ),
                                          
                                          fluidRow(column(12,leafletOutput("findings_minimap")))
@@ -134,9 +150,9 @@ server <- function(input, output, session) {
     
     ae_reactive <- reactive({
         
-        if (input$findings_hb_input != "All"){
+        if (input$findings_hb_input2 != "All"){
             
-            ae_activity %>% filter(hb_name == input$findings_hb_input)
+            ae_activity %>% filter(hb_name == input$findings_hb_input2)
         }
         else
         {
@@ -145,8 +161,8 @@ server <- function(input, output, session) {
     })
     
     covid_clean <- reactive({
-        if (input$findings_hb_input != "All"){
-            covid_impacts %>% filter(hb_name == input$findings_hb_input)
+        if (input$findings_hb_input2 != "All"){
+            covid_impacts %>% filter(hb_name == input$findings_hb_input2)
         }
         else
         {
@@ -325,7 +341,7 @@ server <- function(input, output, session) {
 # a&e graphs -----------------------------------------------------------------    
     output$ae_attendance <- renderPlot({
         
-        if (input$findings_hb_input != "All"){
+        if (input$findings_hb_input2 != "All"){
             
             ae_reactive() %>% 
                 group_by(hb_name, year, month) %>% 
@@ -334,7 +350,7 @@ server <- function(input, output, session) {
                 geom_point(aes(group = hb_name), colour = "steelblue") +
                 geom_line(aes(group = hb_name), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
-                ggtitle(paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input, ") ")) +
+                ggtitle(paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input2, ") ")) +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
@@ -370,8 +386,8 @@ server <- function(input, output, session) {
             aes(x = week_ending, y = sum_admissions) +
             geom_line(colour = "steelblue")+
             ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "Number of Covid Hostpial Admissions",
-                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input, ") ")))+
+                input$findings_hb_input2 == "All" ~ "Number of Covid Hostpial Admissions",
+                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input2, ") ")))+
             labs(y = "Number of Admissions",
                  x = "Week Ending")
     })
@@ -440,8 +456,8 @@ server <- function(input, output, session) {
         geom_col(fill = "green") +
         theme(legend.position = "bottom", legend.title = element_blank()) +
         ggtitle(case_when(
-            input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
-            TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+            input$findings_hb_input2 == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+            TRUE ~ paste0("NHS ", input$findings_hb_input2, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
         scale_y_continuous(labels = scales::label_comma()) +
         guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
         facet_wrap(~year, scales = "free_x")

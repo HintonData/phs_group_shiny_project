@@ -13,6 +13,8 @@ hb_clean <- hb_raw %>%
     select(hb, hb_name) %>% 
     mutate(hb_name = str_remove(hb_name, "NHS "))
 
+write_csv(hb_clean, here("data/clean_data/hb_basic.csv"))
+
 shb_raw <- read_csv(here("data/raw_data/special_health_boards_and_national_facilities.csv")) %>% clean_names()
 
 shb_clean <- shb_raw %>% 
