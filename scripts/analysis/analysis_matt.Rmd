@@ -230,3 +230,201 @@ as_demo_clean %>%
         ),
         strip.placement = "inside")
 ```
+# map TEST
+```{r}
+library(sf)
+library(plotly)
+
+health_board_map <- st_read(dsn = here("data/raw_data/"),
+                                       layer = "sg_nhs_health_boards") %>% 
+  clean_names()
+
+health_board_map %>% 
+  #improve app performance (simplify number of points in map)
+  st_simplify(dTolerance = 1000) %>% 
+  st_cast("MULTIPOLYGON") %>% 
+  st_write(dsn = here("data/clean_data/"),
+           layer = "health_board_map_simple",
+           driver = "ESRI Shapefile")
+
+health_board_map %>%     
+ggplot() +
+  geom_sf(aes(fill = hb_name)) +
+  theme_void() +
+  theme(legend.position = "right")
+
+```
+
+```{r}
+p <- health_board_map %>%
+  ggplot(aes(text = hb_name)) +
+  geom_sf(fill = "gray90",
+          col = "gray40",
+          size = 0.1) +
+  geom_sf(
+    data = health_board_map,
+    #filter here?
+    fill = "steelblue",
+    size = 0.1,
+    colour = "white"
+  ) +
+  theme_void()
+    
+ggplotly(p, tooltip = "text") %>%
+  config(
+    scrollZoom = TRUE,
+    displayModeBar = F,
+    showAxisDragHandles = F
+  )
+```
+
+```{r}
+hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+
+hb_clean <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+hospitals <- read_csv(here("data/raw_data/hospital_data.csv")) %>% clean_names()
+
+hospital_clean <- hospitals %>% 
+    select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
+    rename(longitude = x_coordinate, latitude = y_coordinate)
+
+
+waiting_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% clean_names()
+
+waiting_times <- waiting_raw %>% 
+    mutate(
+        date_ym = ym(month),
+        .before = month,
+        year = year(date_ym),
+        month = month(date_ym, label = TRUE)
+    ) %>%
+    left_join(hb_clean, c("hbt" = "hb")) %>%
+    left_join(hospital_clean, c("treatment_location" = "location", "hbt" = "hb")) %>%
+    rename(
+        total_attendances = number_of_attendances_aggregate,
+        wait_lt_4hrs = number_meeting_target_aggregate,
+        wait_gt_8hrs = attendance_greater8hrs,
+        wait_gt_12hrs = attendance_greater12hrs,
+        hospital_id = treatment_location,
+        hospital_name = location_name
+    ) %>%
+    select(
+        date_ym,
+        year,
+        hb_name,
+        hospital_id,
+        hospital_name,
+        department_type,
+        total_attendances,
+        wait_lt_4hrs,
+        wait_gt_8hrs,
+        wait_gt_12hrs
+    ) %>%
+    mutate(wait_gt_4hrs = total_attendances - wait_lt_4hrs, .after = wait_lt_4hrs) %>%
+    #fill missing values
+    mutate(across(total_attendances:wait_gt_12hrs, .fns = ~ coalesce(., 0))) %>%
+    #create column for when covid appears "year >= 2020"
+    mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
+                                     year >= 2020 ~ TRUE)) %>% 
+    mutate(month = month(date_ym, label = TRUE, abbr = FALSE))
+```
+
+```{r}
+# pre-covid seasonal analysis
+waiting_times %>% 
+  filter(year < 2020) %>% 
+  group_by(year, month) %>% 
+  summarise(total_attendances = sum(total_attendances)) %>% 
+  ggplot(aes(x = month, y = total_attendances, group = year, col = factor(year))) +
+  geom_line()
+# covid seasonal analysis
+waiting_times %>% 
+  filter(year >= 2020) %>% 
+  group_by(year, month) %>% 
+  summarise(total_attendances = sum(total_attendances)) %>% 
+  ggplot(aes(x = month, y = total_attendances, group = year, col = factor(year))) +
+  geom_line()
+```
+
+```{r}
+# wait times -- less than 4 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_lt_4hrs = sum(wait_lt_4hrs)) %>% 
+  ggplot(aes(x = year, y = wait_lt_4hrs)) +
+  geom_col()
+# wait times --- greater than 4 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_4hrs = sum(wait_gt_4hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_4hrs)) +
+  geom_col()
+# wait times --- greater than 8 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_8hrs = sum(wait_gt_8hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_8hrs)) +
+  geom_col()
+# wait times --- greater than 12 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_12hrs = sum(wait_gt_12hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_12hrs)) +
+  geom_col()
+```
+
+```{r}
+# wait times less than 4 hours
+waiting_times %>% 
+  group_by(year, department_type) %>% 
+  summarise(total_attendances = sum(total_attendances),
+            wait_lt_4hrs = sum(wait_lt_4hrs),
+            prop_lt_4hrs = wait_lt_4hrs / total_attendances) %>% 
+  ggplot(aes(x = year, y = prop_lt_4hrs, fill = department_type)) +
+  geom_col(position = "dodge")
+```
+
+```{r}
+wt_targets <- waiting_times %>%
+  group_by(is_covid_year) %>%
+  summarise(
+    attendance_sum = sum(total_attendances),
+    wait_target = sum(wait_lt_4hrs)
+  ) %>%
+  pivot_longer(wait_target, names_to = "wait_time", values_to = "value") %>%
+  mutate(proportion = value / attendance_sum) %>%
+  mutate(target = ifelse(proportion > 0.9, TRUE, FALSE),
+         x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid"))
+  
+ggplot(wt_targets) +
+  geom_bar(aes(
+    x = x_label,
+    y = proportion,
+    fill = target),
+    stat = "identity",
+    position = "dodge"
+  ) +
+  geom_text(aes(y = proportion / 2, x = x_label, label = round(proportion * 100, 2)))+
+  coord_flip() +
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x = element_blank(),
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    axis.text.y = element_text(
+      size = 9,
+      color = "black",
+      face = "bold"
+    )
+  )+
+  ggtitle("test")
+
+```
+
