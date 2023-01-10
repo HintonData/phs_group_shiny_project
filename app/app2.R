@@ -484,21 +484,22 @@ server <- function(input, output, session) {
             ) %>%
             pivot_longer(wait_target, names_to = "wait_time", values_to = "value") %>%
             mutate(proportion = value / attendance_sum) %>%
-            mutate(target = ifelse(proportion > 0.9, TRUE, FALSE),
-                   x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid"))
+            mutate(target = ifelse(round(proportion * 100, 2) > 90, TRUE, FALSE),
+                   x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid")) %>% 
+            mutate(Colour = ifelse(proportion > 0.9, "green", "red"))
         
         
         ggplot(wt_targets) +
             geom_bar(aes(
                 x = x_label,
                 y = proportion,
-                fill = target>0.9),
+                col = Colour),
                 stat = "identity",
                 position = "dodge"
             ) +
             geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
             coord_flip() +
-            scale_fill_brewer(palette = "Dark2")+
+            scale_color_identity()+
             theme(
                 legend.position = "none",
                 axis.title.y = element_blank(),
@@ -515,8 +516,8 @@ server <- function(input, output, session) {
                 )
             )+
             ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "Nationwide Proportion of A&E attendences meeting target of < 4hrs \n(Scotland)",
-                TRUE ~ paste0("NHS ", input$findings_hb_input, " Proportion of A&E attendences meeting target of < 4hrs")))
+                input$findings_hb_input == "All" ~ "Nationwide Proportion of A&E attendences \nmeeting target of < 4hrs(Scotland)",
+                TRUE ~ paste0("NHS ", input$findings_hb_input, " Proportion of A&E attendences \nmeeting target of < 4hrs")))
     })
     
 #page 3 (Datatables) -------------------------------------------------

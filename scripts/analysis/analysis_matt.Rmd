@@ -405,7 +405,7 @@ ggplot(wt_targets) +
   geom_bar(aes(
     x = x_label,
     y = proportion,
-    fill = target),
+    fill = proportion > 0.9),
     stat = "identity",
     position = "dodge"
   ) +
@@ -486,5 +486,34 @@ demo_clean %>%
        y = "Proportion of Hospital Attendances") +
   theme(axis.title.x = element_blank(),
         legend.position = "none")
+```
+
+```{r}
+library(sf)
+
+health_board_map <- st_read(dsn = here("data/clean_data/"),
+                            layer = "health_board_map_simple")
+
+hb_avg_admissions <- demo_clean %>% 
+  group_by(year, hb_name) %>% 
+  summarise(avg_yr_admissions = sum(episodes)) %>% 
+  group_by(hb_name) %>% 
+  summarise(avg_admissions = mean(avg_yr_admissions))
+
+hb_simple <- st_read(dsn = here("data/clean_data/"),
+        layer = "health_board_map_simple") %>% 
+  left_join(hb_avg_admissions, "hb_name") %>%
+  ggplot() +
+  geom_sf(aes(fill = avg_admissions)) +
+  scale_fill_distiller(palette = "Blues", direction = 1, labels = scales::comma) +
+  theme_void() +
+  labs(fill = "Annual hospital admissions")
+hb_simple
+
+
+hb_avg_admissions %>% 
+  filter(!is.na(hb_name)) %>% 
+  arrange(desc(avg_admissions)) %>% 
+  head(5)
 ```
 
