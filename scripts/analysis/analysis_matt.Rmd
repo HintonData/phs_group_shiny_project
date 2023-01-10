@@ -407,7 +407,7 @@ ggplot(wt_targets) +
     stat = "identity",
     position = "dodge"
   ) +
-  geom_text(aes(y = proportion / 2, x = x_label, label = round(proportion * 100, 2)))+
+  geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
   coord_flip() +
   theme(
     legend.position = "none",
@@ -424,7 +424,7 @@ ggplot(wt_targets) +
       face = "bold"
     )
   )+
-  ggtitle("test")
+  ggtitle("")
 
 ```
 
