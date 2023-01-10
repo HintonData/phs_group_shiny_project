@@ -72,7 +72,7 @@ body <- dashboardBody(
                                          fluidRow(column(12,leafletOutput("findings_minimap")))
                             ),
                             
-                            mainPanel(
+                            mainPanel(width = 9,
                                 tabBox(id = "findings_tabs",
                                        width = 12,
                                       
@@ -96,7 +96,7 @@ body <- dashboardBody(
                                        tabPanel("Beds",
                                                 plotOutput("bed_occupancy")),
                                        
-                                       tabPanel("Wait Times",
+                                       tabPanel("KPI",
                                                 fluidRow(column(12,
                                                                 plotOutput("wait_overlay")
                                                                 )),
@@ -492,12 +492,13 @@ server <- function(input, output, session) {
             geom_bar(aes(
                 x = x_label,
                 y = proportion,
-                fill = target),
+                fill = target>0.9),
                 stat = "identity",
                 position = "dodge"
             ) +
             geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
             coord_flip() +
+            scale_fill_brewer(palette = "Dark2")+
             theme(
                 legend.position = "none",
                 axis.title.y = element_blank(),
@@ -513,7 +514,9 @@ server <- function(input, output, session) {
                     face = "bold"
                 )
             )+
-            ggtitle("Targets")
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Nationwide Proportion of A&E attendences meeting target of < 4hrs \n(Scotland)",
+                TRUE ~ paste0("NHS ", input$findings_hb_input, " Proportion of A&E attendences meeting target of < 4hrs")))
     })
     
 #page 3 (Datatables) -------------------------------------------------
