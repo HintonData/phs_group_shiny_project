@@ -132,8 +132,10 @@ server <- function(input, output, session) {
         }
     })
     
-    ae_clean <- reactive({
+    ae_reactive <- reactive({
+        
         if (input$findings_hb_input != "All"){
+            
             ae_activity %>% filter(hb_name == input$findings_hb_input)
         }
         else
@@ -149,6 +151,18 @@ server <- function(input, output, session) {
         else
         {
             covid_impacts
+        }
+    })
+    
+    beds_reactive <- reactive({
+        
+        if (input$findings_hb_input != "All"){
+            beds %>% filter(hb_name == input$findings_hb_input)
+        }
+        
+        else
+        {
+            beds
         }
     })
   
@@ -313,17 +327,14 @@ server <- function(input, output, session) {
         
         if (input$findings_hb_input != "All"){
             
-            ae_clean() %>% 
-                filter(hb_name == input$findings_hb_input) %>% 
+            ae_reactive() %>% 
                 group_by(hb_name, year, month) %>% 
                 summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
                 ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
                 geom_point(aes(group = hb_name), colour = "steelblue") +
                 geom_line(aes(group = hb_name), colour = "steelblue") +
                 theme(legend.position = "bottom", legend.title = element_blank()) +
-                ggtitle(case_when(
-                    input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance per Month",
-                    TRUE ~ paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input, ") "))) +
+                ggtitle(paste0("Aggregate A&E Attendance per Month (NHS ", input$findings_hb_input, ") ")) +
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
@@ -331,7 +342,7 @@ server <- function(input, output, session) {
         }
         
         else {
-            ae_clean() %>% 
+            ae_reactive() %>% 
                 group_by(year, month) %>% 
                 summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate), .groups = "drop") %>% 
                 ggplot(aes(x = month, y = number_of_attendances_aggregate)) +
@@ -369,7 +380,7 @@ server <- function(input, output, session) {
     
     output$bed_occupancy <- renderPlot({
         
-        beds %>% 
+        beds_reactive() %>% 
         group_by(yq) %>% 
         summarise(all_staffed_beddays = sum(all_staffed_beddays),
                   total_occupied_beddays = sum(total_occupied_beddays),
@@ -391,7 +402,7 @@ server <- function(input, output, session) {
         geom_point(aes(y = total_occupied_beddays, group = 1)) +
         geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1), colour = "red") +
         geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
-        geom_text(aes(y = 4500000, x = yq, label = diff)) +
+        geom_text(aes(y = all_staffed_beddays - (all_staffed_beddays / 10), x = yq, label = diff)) +
         geom_vline(xintercept = "2017Q3", linetype = "dashed") +
         geom_vline(xintercept = "2018Q1", linetype = "dashed") +
         geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
@@ -417,10 +428,7 @@ server <- function(input, output, session) {
     
     output$wait_overlay <- renderPlot({
     
-    ae_activity %>% 
-        filter(hb_name == case_when(
-            input$findings_hb_input == "All" ~ hb_name,
-            TRUE ~ input$findings_hb_input)) %>% 
+    ae_reactive() %>% 
         group_by(hb_name, year, month) %>% 
         summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate),
                   number_meeting_target_aggregate = sum(number_meeting_target_aggregate),
