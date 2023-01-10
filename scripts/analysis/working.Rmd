@@ -274,7 +274,99 @@ beds %>%
 ```
 
 ```{r}
-beds 
+as_demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>% 
+    group_by(quarter, is_covid_year) %>% 
+    summarise(episodes = sum(episodes),
+              average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
+              average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
+            mutate(diff = case_when(
+            quarter == "2017Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2018Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2018Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2019Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2019Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2020Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2020Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2021Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+            quarter == "2021Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode)), 4) * 100,
+            TRUE ~ NA_real_)) %>% 
+    ggplot(aes(x = quarter, y = average_length_of_episode)) +
+    geom_line(aes(group = 1)) +
+     geom_text(aes(y = 4, label = diff)) +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2017Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2018Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2018Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2019Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2019Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2020Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2020Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2021Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2021Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+    theme(axis.text.x = element_text(angle = 90)) 
+```
+
+[1] "Elective Inpatients"          "Emergency Inpatients"         "Transfers"                    "All Day cases"                "All Inpatients"              
+[6] "All Inpatients and Day cases" "Not Specified"    
+
+```{r}
+as_demo_clean %>% 
+    filter(admission_type == "Emergency Inpatients") %>% 
+    group_by(quarter, is_covid_year) %>% 
+    summarise(episodes = sum(episodes),
+              average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
+              average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
+            mutate(diff = case_when(
+            quarter == "2017Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2018Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2018Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2019Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2019Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2020Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2020Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2021Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+            quarter == "2021Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay)), 4) * 100,
+            TRUE ~ NA_real_)) %>% 
+    ggplot(aes(x = quarter, y = average_length_of_stay)) +
+    geom_line(aes(group = 1)) +
+     geom_text(aes(y = 6.5, label = diff)) +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2017Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2018Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2018Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2019Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2019Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2020Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2020Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2021Q1", linetype = "dashed") +
+    geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_vline(xintercept = "2021Q3", linetype = "dashed") +
+    geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+    theme(axis.text.x = element_text(angle = 90)) 
+
+as_demo_clean %>% 
+    filter(admission_type == "Emergency Inpatients") %>% 
+    group_by(is_covid_year) %>% 
+    summarise(episodes = sum(episodes),
+              average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
+              average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop")
+```
+
+```{r}
+as_demo_clean %>% 
+    filter(admission_type == "Emergency Inpatients") %>% 
+    group_by(quarter) %>% 
+    summarise(episodes = sum(episodes),
+              stays = sum(stays))
 ```
 
 
