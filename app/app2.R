@@ -20,6 +20,8 @@ beds <- read_csv(here("data/clean_data/beds_clean.csv"))
 hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
 hb_choices_basic <- sort(append(unique(hb_names_basic$hb_name), "All"))
 
+wt_basic <- read_csv(here("data/clean_data/waiting_times_basic.csv"))
+
 #ui stuff
 
 sidebar <- dashboardSidebar(
@@ -95,7 +97,13 @@ body <- dashboardBody(
                                                 plotOutput("bed_occupancy")),
                                        
                                        tabPanel("Wait Times",
-                                                plotOutput("wait_overlay"))
+                                                fluidRow(column(12,
+                                                                plotOutput("wait_overlay")
+                                                                )),
+                                                fluidRow(column(6,
+                                                                "...."),
+                                                         column(6, plotOutput("wait_targets")))
+                                                )
                                        
                                        )
                 ))),
@@ -147,6 +155,18 @@ server <- function(input, output, session) {
         else
         {
             ae_activity
+        }
+    })
+    
+    wt_reactive <- reactive({
+        
+        if (input$findings_hb_input != "All"){
+            
+            wt_basic %>% filter(hb_name == input$findings_hb_input)
+        }
+        else
+        {
+            wt_basic
         }
     })
     
@@ -434,7 +454,7 @@ server <- function(input, output, session) {
     
     output$wait_overlay <- renderPlot({
     
-    ae_reactive() %>% 
+        ae_reactive() %>% 
         group_by(hb_name, year, month) %>% 
         summarise(number_of_attendances_aggregate = sum(number_of_attendances_aggregate),
                   number_meeting_target_aggregate = sum(number_meeting_target_aggregate),
@@ -453,6 +473,48 @@ server <- function(input, output, session) {
         facet_wrap(~year, scales = "free_x")
         
         })
+    
+    output$wait_targets <- renderPlot({
+        
+        wt_targets <- wt_reactive() %>%
+            group_by(is_covid_year) %>%
+            summarise(
+                attendance_sum = sum(total_attendances),
+                wait_target = sum(wait_lt_4hrs)
+            ) %>%
+            pivot_longer(wait_target, names_to = "wait_time", values_to = "value") %>%
+            mutate(proportion = value / attendance_sum) %>%
+            mutate(target = ifelse(proportion > 0.9, TRUE, FALSE),
+                   x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid"))
+        
+        
+        ggplot(wt_targets) +
+            geom_bar(aes(
+                x = x_label,
+                y = proportion,
+                fill = target),
+                stat = "identity",
+                position = "dodge"
+            ) +
+            geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
+            coord_flip() +
+            theme(
+                legend.position = "none",
+                axis.title.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                axis.ticks.x = element_blank(),
+                axis.text.x = element_blank(),
+                axis.title.x = element_blank(),
+                panel.background = element_blank(),
+                panel.grid = element_blank(),
+                axis.text.y = element_text(
+                    size = 9,
+                    color = "black",
+                    face = "bold"
+                )
+            )+
+            ggtitle("Targets")
+    })
     
 #page 3 (Datatables) -------------------------------------------------
     

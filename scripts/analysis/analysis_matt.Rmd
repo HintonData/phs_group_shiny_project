@@ -330,6 +330,8 @@ waiting_times <- waiting_raw %>%
     mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
                                      year >= 2020 ~ TRUE)) %>% 
     mutate(month = month(date_ym, label = TRUE, abbr = FALSE))
+
+write_csv(waiting_times, here("data/clean_data/waiting_times_basic.csv"))
 ```
 
 ```{r}
@@ -426,5 +428,63 @@ ggplot(wt_targets) +
   )+
   ggtitle("")
 
+```
+
+```{r}
+demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
+
+demo_clean <- demo_clean %>% 
+  mutate(q = str_sub(quarter, -2, -1),
+         q = factor(q, levels = c("Q1", "Q2", "Q3", "Q4"), ordered = TRUE),
+         year = yq(quarter),
+         year = year(year))
+```
+
+```{r}
+total_ep_year <- demo_clean %>% 
+  group_by(year) %>% 
+  summarise(yearly_eps = sum(episodes))
+demo_clean %>% 
+  filter(year > 2016 & year <= 2019) %>% 
+  group_by(year, q) %>% 
+  summarise(q_episodes = sum(episodes)) %>%
+  left_join(total_ep_year, "year") %>%
+  mutate(q_percent = q_episodes / yearly_eps) %>% 
+  group_by(q) %>% 
+  summarise(avg_q_percent = mean(q_percent)) %>% 
+  ggplot(aes(x = q, y = avg_q_percent,
+             label = scales::percent(avg_q_percent, accuracy = 0.1)),
+             col = "black")+
+  geom_col(fill = "steelblue") +
+  geom_label(position = position_stack(vjust = 0.5),
+              col = "black", fill = "white") +
+  theme_classic() +
+  labs(title = "Average proportion of hospital attendances by quarter (Pre-Covid)",
+       y = "Proportion of Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+```
+```{r}
+demo_clean %>% 
+  filter(year > 2019) %>% 
+  group_by(year, q) %>% 
+  summarise(q_episodes = sum(episodes)) %>%
+  left_join(total_ep_year, "year") %>%
+  mutate(q_percent = q_episodes / yearly_eps) %>% 
+  group_by(q) %>% 
+  summarise(avg_q_percent = mean(q_percent)) %>% 
+  ggplot(aes(x = q, y = avg_q_percent,
+             label = scales::percent(avg_q_percent, accuracy = 0.1),
+             fill = q),
+             col = "black") +
+  geom_col(fill = "orange") +
+  geom_label(position = position_stack(vjust = 0.5),
+              col = "black", fill = "white") +
+  theme_classic() +
+  labs(title = "Average proportion of hospital attendances by quarter (Covid)", 
+       col = "Health Board",
+       y = "Proportion of Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
 ```
 
