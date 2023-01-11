@@ -19,18 +19,36 @@ Matthew Marr
 
 ### Roles & responsibilities of each member
 
-**Everyone** worked on ....
+**Everyone** worked on:
+* cleaning and Analysing datasets
+* Designing the Dashboard
+* Building Shiny app
+* Managing github repository
 
-**Person 1** worked on ....
+**Andrew Wyllie** worked on:
+* Cleaning and Analysing data related to Accident and Emergencies, Hospital beds occupancy data
+* Creating visualisations used in the shiny application
+* Bug fixing the shiny application
 
-**Person 2** worked on ....
+**Ben Hinton** worked on:
+* Cleaning and Analysing data related to covid admissions data
+* Creating visualisations used in the shiny application
+* Bug fixing the shiny application
 
-**Person 3** worked on ....
-
+**Matthew Marr** worked on:
+* Cleaning and Analysing data related to general admissions
+* Creating visualisations used in the shiny application
+* Bug fixing the shiny application
 
 ### Brief description of dashboard topic
 
-Our dashboard contains ...
+Our dashboard contains:
+* Overview tab that explains what the dashboard contains
+* A findings tab that contains:
+    * Input selection for specific health boards across Scotland
+    * Map that updates based on specific health board choice
+    * Multiple visualisations for specific data points (a&e waiting times, hospital bed occupancies, general admissions)
+* Data view tab that allows the user to browse the data used within he application
 
 Our topic is ...
 
