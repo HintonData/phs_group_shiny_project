@@ -427,7 +427,7 @@ server <- function(input, output, session) {
         summarise(all_staffed_beddays = sum(all_staffed_beddays),
                   total_occupied_beddays = sum(total_occupied_beddays),
                   empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
-            ws_set_highlights("total_occupied_beddays") %>% 
+        ws_set_highlights("total_occupied_beddays") %>% 
         ggplot(aes(x = yq)) +
         geom_point(aes(y = all_staffed_beddays, group = 1)) +
         geom_line(aes(y = all_staffed_beddays, group = 1, colour = all_staffed_beddays)) +
