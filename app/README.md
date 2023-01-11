@@ -1,4 +1,4 @@
-### Dashbaord :computer:
+### Dashboard :computer:
 
 [global](global.R) - all code for loading clean data & libraries used within this project.
 
