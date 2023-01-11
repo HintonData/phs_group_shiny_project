@@ -534,13 +534,12 @@ server <- function(input, output, session) {
             geom_bar(aes(
                 x = x_label,
                 y = proportion,
-                col = Colour),
-                stat = "identity",
-                position = "dodge"
+                fill = Colour),
+                stat = "identity"
             ) +
             geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
             coord_flip() +
-            scale_color_identity()+
+            scale_fill_identity()+
             theme(
                 legend.position = "none",
                 axis.title.y = element_blank(),
