@@ -417,20 +417,20 @@ server <- function(input, output, session) {
         geom_line(aes(y = all_staffed_beddays,group = 1, colour = all_staffed_beddays), colour = "green") +
         geom_point(aes(y = total_occupied_beddays, group = 1)) +
         geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1), colour = "red") +
-        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
-        geom_text(aes(y = all_staffed_beddays - (all_staffed_beddays / 10), x = yq, label = diff)) +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_text(aes(y = max(total_occupied_beddays * 0.75), x = yq, label = diff)) +
         geom_vline(xintercept = "2017Q3", linetype = "dashed") +
         geom_vline(xintercept = "2018Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2018Q3", linetype = "dashed") +
         geom_vline(xintercept = "2019Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2019Q3", linetype = "dashed") +
         geom_vline(xintercept = "2020Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2020Q3", linetype = "dashed") +
         geom_vline(xintercept = "2021Q1", linetype = "dashed") +
-        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = min(total_occupied_beddays), ymax = Inf), alpha = 0.01) +
+        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2021Q3", linetype = "dashed") +
         geom_vline(xintercept = "2022Q1", linetype = "dashed") +
         scale_y_continuous(labels = scales::label_comma()) +
