@@ -1,5 +1,7 @@
-# Scripts
-any script used to clean data etc goes here?
+### Scripts :scroll:
 
-or notebooks to create graphs
- 
+[analysis](analysis/) - All files related to getting insights into the data used within this project. (.rmd / .r files)
+
+(cleaning_script.R) - script that cleans all the raw data used within this project. (.R)
+
+
