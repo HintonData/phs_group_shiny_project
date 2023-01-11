@@ -94,7 +94,8 @@ body <- dashboardBody(
                                                 plotOutput("covid_graph")),
                                        
                                        tabPanel("Beds",
-                                                plotOutput("bed_occupancy")),
+                                                fluidRow(plotOutput("bed_occupancy")),
+                                                fluidRow(plotOutput("stay_length"))),
                                        
                                        tabPanel("KPI",
                                                 fluidRow(column(12,
@@ -458,6 +459,38 @@ server <- function(input, output, session) {
         theme(axis.text.x = element_text(angle = 90))
         
     })
+    
+    output$stay_length <- renderPlot({
+        
+        as_demo_clean %>% 
+            dplyr::rename(yq = quarter) %>% 
+        filter(admission_type == "All Inpatients") %>% 
+        group_by(yq, is_covid_year) %>% 
+        summarise(episodes = sum(episodes),
+                  average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
+                  average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
+        ws_set_highlights(average_length_of_stay) %>% 
+        ggplot(aes(x = yq, y = average_length_of_stay)) +
+        geom_line(aes(group = 1)) +
+        geom_text(aes(y = 6.5, label = diff)) +
+        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2017Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2018Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2018Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2019Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2019Q3", xmax = "2020Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2019Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2020Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2020Q3", xmax = "2021Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2020Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2021Q1", linetype = "dashed") +
+        geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
+        geom_vline(xintercept = "2021Q3", linetype = "dashed") +
+        geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+        theme(axis.text.x = element_text(angle = 90)) 
+        
+        })
     
 # wait times graphs ------------------------------------------------------
     

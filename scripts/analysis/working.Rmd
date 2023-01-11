@@ -317,7 +317,7 @@ as_demo_clean %>%
 
 ```{r}
 as_demo_clean %>% 
-    filter(admission_type == "Emergency Inpatients") %>% 
+    filter(admission_type == "All Inpatients") %>% 
     group_by(quarter, is_covid_year) %>% 
     summarise(episodes = sum(episodes),
               average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
