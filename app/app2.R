@@ -419,9 +419,9 @@ server <- function(input, output, session) {
           yq == "2020Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
           yq == "2021Q2" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
           yq == "2021Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc)), 4) * 100,
-          TRUE ~ NA_real_))
+          TRUE ~ NA_real_)) %>% 
+         mutate(label = ifelse(is.na(diff) == FALSE, paste0("<-  ", diff,"%  ->"), NA_character_))
     }
-    
     
     output$bed_occupancy <- renderPlot({
         
@@ -432,12 +432,11 @@ server <- function(input, output, session) {
                   empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
         ws_set_highlights(total_occupied_beddays) %>% 
         ggplot(aes(x = yq)) +
-        geom_point(aes(y = all_staffed_beddays, group = 1)) +
-        geom_line(aes(y = all_staffed_beddays, group = 1, colour = all_staffed_beddays)) +
-        geom_point(aes(y = total_occupied_beddays, group = 1)) +
-        geom_line(aes(y = total_occupied_beddays, colour = total_occupied_beddays, group = 1)) +
+ #       geom_point(aes(y = all_staffed_beddays, group = 1)) +
+ #       geom_line(aes(y = all_staffed_beddays, group = 1, colour = "Staffed Bed Days")) +
+        geom_point(aes(y = total_occupied_beddays)) +
+        geom_line(aes(y = total_occupied_beddays, group = 1)) +
         geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
-        geom_text(aes(y = max(total_occupied_beddays * 0.75), x = yq, label = diff)) +
         geom_vline(xintercept = "2017Q3", linetype = "dashed") +
         geom_vline(xintercept = "2018Q1", linetype = "dashed") +
         geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
@@ -452,10 +451,21 @@ server <- function(input, output, session) {
         geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2021Q3", linetype = "dashed") +
         geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+            geom_label(aes(y = max(all_staffed_beddays * 0.75), x = yq, label = label)) +
         scale_y_continuous(labels = scales::label_comma()) +
-        labs(y = "Number of Bed Days",
-             x = "Year, Quarter") +
-        theme(axis.text.x = element_text(angle = 90))
+        labs(y = "Number of Bed Days\n",
+             x = "\nYear, Quarter",
+             title = "Occupied Bed Days per Quarter, Highlighting Half Year") +
+            theme_classic() +
+        theme(axis.text.x = element_text(angle = 45,
+                                         hjust = 1,
+                                         size = 11),
+              axis.text.y = element_text(size = 12),
+              legend.position = "hidden",
+              legend.title = element_blank(),
+              legend.key.width = unit(2, "cm"),
+              legend.key.height = unit(1, "cm"),
+              legend.text = element_text(size = 12))
         
     })
     
@@ -471,7 +481,6 @@ server <- function(input, output, session) {
         ws_set_highlights(average_length_of_stay) %>% 
         ggplot(aes(x = yq, y = average_length_of_stay)) +
         geom_line(aes(group = 1)) +
-        geom_text(aes(y = 6.5, label = diff)) +
         geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2017Q3", linetype = "dashed") +
         geom_vline(xintercept = "2018Q1", linetype = "dashed") +
@@ -487,6 +496,7 @@ server <- function(input, output, session) {
         geom_rect(aes(xmin = "2021Q3", xmax = "2022Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
         geom_vline(xintercept = "2021Q3", linetype = "dashed") +
         geom_vline(xintercept = "2022Q1", linetype = "dashed") +
+        geom_label(aes(y = mean(average_length_of_stay * 0.75), x = yq, label = label)) +
         theme(axis.text.x = element_text(angle = 90)) 
         
         })
@@ -553,7 +563,8 @@ server <- function(input, output, session) {
                     color = "black",
                     face = "bold"
                 )
-            )+
+            ) +
+            
             ggtitle(case_when(
                 input$findings_hb_input == "All" ~ "Nationwide Proportion of A&E attendences \nmeeting target of < 4hrs(Scotland)",
                 TRUE ~ paste0("NHS ", input$findings_hb_input, " Proportion of A&E attendences \nmeeting target of < 4hrs")))
