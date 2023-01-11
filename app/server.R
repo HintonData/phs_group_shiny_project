@@ -317,8 +317,8 @@ server <- function(input, output, session) {
             ggplot(aes(x = yq)) +
             #       geom_point(aes(y = all_staffed_beddays, group = 1)) +
             #       geom_line(aes(y = all_staffed_beddays, group = 1, colour = "Staffed Bed Days")) +
-            geom_point(aes(y = total_occupied_beddays)) +
-            geom_line(aes(y = total_occupied_beddays, group = 1)) +
+            geom_point(aes(y = total_occupied_beddays), colour = "steelblue") +
+            geom_line(aes(y = total_occupied_beddays, group = 1), colour = "steelblue") +
             geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
             geom_vline(xintercept = "2017Q3", linetype = "dashed") +
             geom_vline(xintercept = "2018Q1", linetype = "dashed") +
@@ -363,7 +363,8 @@ server <- function(input, output, session) {
                       average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
             ws_set_highlights(average_length_of_stay) %>% 
             ggplot(aes(x = yq, y = average_length_of_stay)) +
-            geom_line(aes(group = 1)) +
+            geom_point(colour = "steelblue") +
+            geom_line(aes(group = 1), colour = "steelblue") +
             geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = -Inf, ymax = Inf), alpha = 0.01) +
             geom_vline(xintercept = "2017Q3", linetype = "dashed") +
             geom_vline(xintercept = "2018Q1", linetype = "dashed") +
