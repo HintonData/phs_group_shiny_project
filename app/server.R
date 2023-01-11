@@ -421,7 +421,7 @@ server <- function(input, output, session) {
                 panel.background = element_blank(),
                 panel.grid = element_blank(),
                 axis.text.y = element_text(
-                    size = 9,
+                    size = 11,
                     color = "black",
                     face = "bold"
                 )

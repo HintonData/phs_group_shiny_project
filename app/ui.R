@@ -82,8 +82,8 @@ tabItem(tabName = "findings",
                                                       plotOutput("wait_overlay")
                                       )),
                                       fluidRow(column(6,
-                                                      "...."),
-                                               column(6, plotOutput("wait_targets")))
+                                                      plotOutput("wait_targets")),
+                                               column(6, "....."))
                              )
                              
                       )
