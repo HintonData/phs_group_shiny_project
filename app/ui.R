@@ -83,7 +83,8 @@ tabItem(tabName = "findings",
                                       )),
                                       fluidRow(column(6,
                                                       plotOutput("wait_targets")),
-                                               column(6, "....."))
+                                               column(6, 
+                                                      plotOutput("occupancy_kpi")))
                              )
                              
                       )

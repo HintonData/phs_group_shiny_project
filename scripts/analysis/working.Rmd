@@ -388,8 +388,14 @@ ws_set_highlights <- function(df, col_name){
 ```
 
 ```{r}
-ae_activity %>% 
-    ws_set_highlights("total_occupied_beddays")
+beds %>% 
+    mutate(is_covid = (year >= 2020)) %>% 
+    group_by(year) %>% 
+    summarise(occupancy_pct = mean(percentage_occupancy, na.rm = TRUE), is_covid) %>% 
+    distinct() %>% 
+    ggplot(aes(x = year, y = occupancy_pct, fill = is_covid)) +
+    geom_col(aes(group = 1)) +
+    scale_x_continuous(breaks = c(2017:2022))
 ```
 
 

@@ -465,6 +465,30 @@ server <- function(input, output, session) {
                 TRUE ~ paste0("NHS ", input$findings_hb_input, " Proportion of A&E attendences \nmeeting target of < 4hrs")))
     })
     
+    output$occupancy_kpi <- renderPlot({
+        
+        beds_reactive() %>% 
+        mutate(is_covid = (year >= 2020)) %>% 
+            group_by(year) %>% 
+            summarise(occupancy_pct = mean(percentage_occupancy, na.rm = TRUE), is_covid) %>% 
+            distinct() %>% 
+            ggplot(aes(x = year, y = occupancy_pct, fill = is_covid)) +
+            geom_col() +
+            geom_label(aes(y = occupancy_pct, label = paste0(round(occupancy_pct, 2), "%")), fill = "white") +
+            scale_x_continuous(breaks = c(2017:2022)) +
+            scale_fill_manual(labels = c("Pre-Covid", "Covid"), values = c("#4DAF4A", "#E41A1D")) +
+            labs(y = "Average Occupancy (%)\n",
+                 x = "\nYear",
+                 title = "Average Bed Occupancy per Year") +
+            theme_classic() +
+            theme(axis.text.x = element_text(size = 12),
+                  axis.text.y = element_text(size = 12),
+                  legend.position = "right",
+                  legend.title = element_blank(),
+                  legend.key.size = unit(1, "cm"),
+                  legend.text = element_text(size = 12))
+    })
+    
     #page 3 (Datatables) -------------------------------------------------
     
     output$demo_table <- renderDataTable(
