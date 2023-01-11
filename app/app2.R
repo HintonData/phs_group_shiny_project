@@ -38,23 +38,22 @@ body <- dashboardBody(
         tabItem(tabName = "overview",
                 h1("Overview"),
                 p(
-                    "Since the start of the pandemic, NHS Scotland has had to adjust and adapt to unforeseen and changing circumstances on a continual basis to meet the ever changing demand and challenges facing it. While the pandemic has been an unforeseen pressure, one predictable pressure is the winter period and effect it has on unscheduled care and subsequent capacity and demand on hospital services in the NHS."
+                    "As said previously, we have set out to answer two questions;"
                 ),
                 
                 p(
-                    "Hospital services make up a considerable part of the whole healthcare system and as such draw much of the attention in terms of the statistics in the public domain."
+                    "1. To what extent are the 'winter crises' reported by the media real?
+"
                 ),
                 
                 p(
-                    "We have created a dashboard using R-Shiny and data from Public Health Scotland on secondary care to investigate what has been happening from 2020 onwards in the acute hospital sector. Using visualisations we will show our narrative of how the NHS coped during the pandemic."
+                    "2. How has the Covid-19 pandemic affected provision of acute care in Scotland?"
                 ),
                 
                 p(
-                    "We have focused on the impact of winter on health care, mainly the hospital (acute care) sector and specifically these questions:"
-                ),
+                    "In this presentation, we will show how Covid has impacted the NHS, specifically in terms of hospital services. We will also present our analysis on the so-called ‘winter crises’ mentioned previously. Using data from Public Health Scotland, we will show our key insights on the temporal, demographic and geographic angles, as well as general trends, and give you our conclusions."
+                )),
                 
-                p("1. To what extent are the 'winter crises' reported by the media real?"),
-                p("2. How has the Covid-19 pandemic affected provision of acute care in Scotland?")),
                 
                 tabItem(tabName = "findings",
                         
