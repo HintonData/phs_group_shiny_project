@@ -398,5 +398,60 @@ beds %>%
     scale_x_continuous(breaks = c(2017:2022))
 ```
 
+```{r}
+as_demo_clean %>% 
+            filter(admission_type == "All Inpatients") %>% 
+            group_by(quarter, sex) %>% 
+            summarise(total_age_sex = sum(episodes)) 
+```
 
+
+```{r}
+as_demo_clean %>% 
+    filter(quarter == "2017Q2") %>% 
+    group_by(admission_type, quarter) %>%
+            summarise(total_age_sex = sum(episodes)) %>% 
+    arrange(-total_age_sex)
+```
+
+```{r}
+total_sex <- as_demo_clean %>% 
+            filter(admission_type == "All Inpatients") %>%  
+            group_by(is_covid_year) %>% 
+            summarise(total_episodes = sum(episodes))
+        
+        as_demo_clean %>% 
+            filter(admission_type == "All Inpatients") %>%  
+            group_by(is_covid_year, sex) %>% 
+            summarise(sum_episodes = sum(episodes)) %>% 
+            left_join(total_sex, "is_covid_year") %>% 
+            mutate(proportion = sum_episodes / total_episodes,
+                   is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+                        ggplot(aes(x = is_covid_year, y = proportion, fill = sex)) +
+                        geom_col() +
+                        geom_label(aes(label = proportion), position = position_stack(), fill = "white")
+```
+
+```{r}
+        total_pre_covid <- as_demo_clean %>% 
+            filter(admission_type == "All Inpatients") %>%  
+            group_by(is_covid_year) %>% 
+            summarise(total_episodes = sum(episodes))
+        
+        as_demo_clean %>% 
+            filter(admission_type == "All Inpatients") %>%  
+            group_by(is_covid_year, sex, age) %>%
+            summarise(sum_episodes = sum(episodes)) %>%
+            left_join(total_pre_covid, by = "is_covid_year") %>%
+            mutate(
+                sex = factor(sex, c("Male", "Female")),
+                prop_age_group = (sum_episodes / total_episodes) * 100) %>%
+            select(-sum_episodes, -total_episodes) %>%
+            pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
+            mutate(diff = Covid - Pre_Covid,
+                   is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+            select(-Covid, -Pre_Covid)
+        
+        total_pre_covid
+```
 

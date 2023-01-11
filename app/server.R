@@ -9,12 +9,16 @@ server <- function(input, output, session) {
     
     # reactive data ------------------------------------------------------   
     demo_clean <- reactive({
+        
+        
         if (input$findings_hb_input != "All"){
-            as_demo_clean %>% filter(hb_name == input$findings_hb_input)
+            
+            as_demo_clean %>% filter(hb_name == input$findings_hb_input,
+                                     admission_type == "All Inpatients")
         }
         else
         {
-            as_demo_clean
+            as_demo_clean %>% filter(admission_type == "All Inpatients")
         }
     })
     
@@ -95,7 +99,7 @@ server <- function(input, output, session) {
         }})
     
     # demo graphs ----------------------------------------------------------------   
-    output$demo_graph <- renderPlot({
+    output$demo_graph_gender <- renderPlot({
         
         demo_totals <- demo_clean() %>% 
             mutate(
@@ -112,23 +116,70 @@ server <- function(input, output, session) {
             )
         
         demo_totals %>% 
-            group_by(quarter) %>% 
+            group_by(quarter, sex) %>% 
             summarise(total_age_sex = sum(episodes)) %>% 
-            ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
-            geom_line(colour = "steelblue") +
-            geom_point(colour = "steelblue") +
+            ggplot(aes(x = quarter, y = total_age_sex)) +
+            geom_line(aes(colour = sex, group = sex)) +
+            geom_point(aes(colour = sex)) +
             theme_classic() +
-            scale_y_continuous(labels = scales::comma, 
-                               expand = c(0, 0),
-                               limits = c(0, NA)) +
+            scale_y_continuous(labels = scales::comma) +
             labs(title = "Nationwide Hospital Attendances (Scotland)",
                  y = "Hospital Attendances") +
-            theme(axis.title.x = element_blank(),
-                  axis.text.x = element_text(angle = 45, hjust = 1),
-                  legend.position = "none")+
             ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances (Scotland)",
-                TRUE ~ paste0("Hospital Attendances (NHS ", input$findings_hb_input, ")")))
+                input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances, Sex (Scotland)",
+                TRUE ~ paste0("Hospital Attendances, Sex (NHS ", input$findings_hb_input, ")"))) +
+            theme_classic() +
+            theme(axis.text.x = element_text(angle = 45,
+                                             hjust = 1,
+                                             size = 12),
+                  axis.title.x = element_blank(),
+                  axis.text.y = element_text(size = 12),
+                  legend.position = "top",
+                  legend.title = element_blank(),
+                  legend.key.width = unit(2, "cm"),
+                  legend.key.height = unit(1, "cm"),
+                  legend.text = element_text(size = 12))
+        
+    })
+    
+    output$demo_graph_age <- renderPlot({
+        
+        demo_totals <- demo_clean() %>% 
+            mutate(
+                #remove Year from Quarter column
+                q = str_sub(quarter, -2, -1),
+                #create a factor
+                q = factor(
+                    q,
+                    levels = c("Q1", "Q2", "Q3", "Q4"),
+                    ordered = TRUE
+                ),
+                year = yq(quarter),
+                year = year(year)
+            )
+        
+        demo_totals %>% 
+            group_by(quarter, age) %>% 
+            summarise(total_age_sex = sum(episodes)) %>% 
+            ggplot(aes(x = quarter, y = total_age_sex)) +
+            geom_line(aes(colour = age, group = age)) +
+            geom_point(aes(colour = age)) +
+            scale_y_continuous(labels = scales::comma) +
+            labs(title = "Nationwide Hospital Attendances (Scotland)",
+                 y = "Hospital Attendances") +
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances, Age Group (Scotland)",
+                TRUE ~ paste0("Hospital Attendances, Age Group (NHS ", input$findings_hb_input, ")"))) +
+            theme_classic() +
+            theme(axis.text.x = element_text(angle = 45,
+                                             hjust = 1,
+                                             size = 12),
+                  axis.title.x = element_blank(),
+                  axis.text.y = element_text(size = 12),
+                  legend.position = "bottom",
+                  legend.title = element_blank(),
+                  legend.key.size = unit(1, "cm"),
+                  legend.text = element_text(size = 12))
         
     })
     
@@ -144,11 +195,13 @@ server <- function(input, output, session) {
             left_join(total_sex, "is_covid_year") %>% 
             mutate(proportion = sum_episodes / total_episodes,
                    is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
-            ggplot(aes(x = is_covid_year, y = proportion, fill = sex,
-                       label = scales::percent(proportion, accuracy = 0.1))) +
+            ggplot(aes(x = is_covid_year, y = proportion, fill = sex)) +
             geom_col() +
             #adds label to each column
-            geom_label(position = position_stack(vjust = 0.5), fill = "white") +
+            geom_label(aes(label = scales::percent(proportion, accuracy = 0.1)), 
+                       position = position_stack(), vjust = 0) +
+            geom_label(aes(label = scales::percent(proportion, accuracy = 0.1)), 
+                       position = position_stack(), vjust = 3, fill = "white") +
             scale_fill_brewer(palette = "Dark2")+
             labs(subtitle = "Pre-covid vs During Covid",
                  fill = "Sex")+
@@ -163,8 +216,8 @@ server <- function(input, output, session) {
                                              size = 11, 
                                              colour = "black"))+
             ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "Nationwide Proportion of attendances by sex (Scotland)",
-                TRUE ~ paste0("Proportion of attendances by sex (NHS ", input$findings_hb_input, ")")))
+                input$findings_hb_input == "All" ~ "Nationwide Proportion of Attendances by Sex (Scotland)",
+                TRUE ~ paste0("Proportion of attendances by Sex (NHS ", input$findings_hb_input, ")")))
     })
     
     output$demo_prop_change <- renderPlot({
@@ -276,10 +329,13 @@ server <- function(input, output, session) {
             aes(x = week_ending, y = sum_admissions) +
             geom_line(colour = "steelblue")+
             ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "Number of Covid Hostpial Admissions",
-                TRUE ~ paste0("Number of Covid Hostpial Admissions (NHS ", input$findings_hb_input, ") ")))+
+                input$findings_hb_input == "All" ~ "Weekly Hospital Admissions, 2020 onwards (NHS Scotland)",
+                TRUE ~ paste0("Weekly Hospital Admissions, 2020 onwards (NHS ", input$findings_hb_input, ") ")))+
             labs(y = "Number of Admissions",
-                 x = "Week Ending")
+                 x = "Week Ending") +
+            theme_classic() +
+            theme(axis.text = element_text(size = 12),
+                  axis.title.x = element_blank())
     })
     
     # beds graphs --------------------------------------------------------------

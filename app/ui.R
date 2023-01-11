@@ -57,38 +57,50 @@ tabItem(tabName = "findings",
                              
                              tabPanel("Demographics",
                                       fluidRow(column(12, 
-                                                      plotOutput("demo_graph")
-                                      )),
-                                      fluidRow(column(6,
-                                                      plotOutput("demo_graph_gender_prop")    
-                                      ),
-                                      column(6,plotOutput("demo_prop_change")
+                                                      plotOutput("demo_graph_gender"),
+                                                      plotOutput("demo_graph_age")
                                       ))
                              ),
                              
                              tabPanel("A&E",
-                                      plotOutput("ae_attendance")),
+                                      plotOutput("ae_attendance")
+                             ),
                              
-                             tabPanel("Covid Impacts",
-                                      plotOutput("covid_graph")),
-                             
-                             tabPanel("Beds",
+                             tabPanel("Seasonal",
                                       fluidRow(column(12,plotOutput("bed_occupancy"))),
                                       fluidRow(column(12,plotOutput("stay_length")))
-                                      ),
+                             ),
                              
-                             tabPanel("KPI",
+                             tabPanel("Covid Impacts - KPIs",
                                       fluidRow(column(12,
                                                       plotOutput("wait_overlay")
                                       )),
                                       fluidRow(column(6,
                                                       plotOutput("wait_targets")),
                                                column(6, 
-                                                      plotOutput("occupancy_kpi")))
+                                                      plotOutput("occupancy_kpi"))),
+                                      
+                             ),
+                             
+                             tabPanel("Covid Impacts - Demographics",
+                                      
+                                      fluidRow(
+                                          column(6, plotOutput("demo_graph_gender_prop")    
+                                          ),
+                                          column(6, plotOutput("demo_prop_change")
+                                          )
+                                      )),
+                             
+                             tabPanel("2020-",
+                                      plotOutput("covid_graph")
+                                      
                              )
                              
+                             
                       )
-            ))),
+                      
+            )
+        )),
 
 tabItem(tabName = "data_view",
         (tabBox(id = "data_view_tabs",
