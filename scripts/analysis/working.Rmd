@@ -369,7 +369,28 @@ as_demo_clean %>%
               stays = sum(stays))
 ```
 
+```{r}
+ws_set_highlights <- function(df, col_name){
+    
+    df %>% 
+    mutate(diff = case_when(
+        yq == "2017Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2018Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2018Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2019Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2019Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2020Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2020Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2021Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+        yq == "2021Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name)), 4) * 100,
+        TRUE ~ NA_real_))
+}
+```
 
+```{r}
+ae_activity %>% 
+    ws_set_highlights("total_occupied_beddays")
+```
 
 
 
