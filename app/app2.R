@@ -22,22 +22,6 @@ hb_choices_basic <- sort(append(unique(hb_names_basic$hb_name), "All"))
 
 wt_basic <- read_csv(here("data/clean_data/waiting_times_basic.csv"))
 
-ws_set_highlights <- function(df, col_name){
-    
-    df %>% 
-    mutate(diff = case_when(
-        yq == "2017Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2018Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2018Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2019Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2019Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2020Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2020Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2021Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2021Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name)), 4) * 100,
-        TRUE ~ NA_real_))
-}
-
 #ui stuff
 
 sidebar <- dashboardSidebar(
@@ -420,6 +404,25 @@ server <- function(input, output, session) {
     
 # beds graphs --------------------------------------------------------------
     
+    ws_set_highlights <- function(df,col_name){
+      
+      myenc <- enquo(col_name)
+
+      df %>% 
+        mutate(diff = case_when(
+          yq == "2017Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2018Q2" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2018Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2019Q2" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2019Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2020Q2" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2020Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2021Q2" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc, 1)), 4) * 100,
+          yq == "2021Q4" ~ round(((lead(!!myenc) - lag(!!myenc, 1)) / lag(!!myenc)), 4) * 100,
+          TRUE ~ NA_real_))
+    }
+    
+    
     output$bed_occupancy <- renderPlot({
         
         beds_reactive() %>% 
@@ -427,7 +430,7 @@ server <- function(input, output, session) {
         summarise(all_staffed_beddays = sum(all_staffed_beddays),
                   total_occupied_beddays = sum(total_occupied_beddays),
                   empty_beds = sum(all_staffed_beddays - total_occupied_beddays)) %>% 
-        ws_set_highlights("total_occupied_beddays") %>% 
+        ws_set_highlights(total_occupied_beddays) %>% 
         ggplot(aes(x = yq)) +
         geom_point(aes(y = all_staffed_beddays, group = 1)) +
         geom_line(aes(y = all_staffed_beddays, group = 1, colour = all_staffed_beddays)) +
