@@ -239,8 +239,7 @@ server <- function(input, output, session) {
                 labs(y = "Number of attendences",
                      x = "\nMonth") +
                 theme_classic() +
-                theme(axis.text.x = element_text(size = 11),
-                      axis.text.y = element_text(size = 12),
+                theme(axis.text = element_text(size = 12),
                       strip.text = element_text(size = 12))
         }
         
@@ -259,8 +258,7 @@ server <- function(input, output, session) {
                 labs(y = "Number of attendences",
                      x = "\nMonth") +
                 theme_classic() +
-                theme(axis.text.x = element_text(size = 11),
-                      axis.text.y = element_text(size = 12),
+                theme(axis.text = element_text(size = 12),
                       strip.text = element_text(size = 12))
         }
         
@@ -342,7 +340,7 @@ server <- function(input, output, session) {
             theme_classic() +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
-                                             size = 11),
+                                             size = 12),
                   axis.text.y = element_text(size = 12),
                   legend.position = "hidden",
                   legend.title = element_blank(),
@@ -387,7 +385,7 @@ server <- function(input, output, session) {
             theme_classic() +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
-                                             size = 11),
+                                             size = 12),
                   axis.text.y = element_text(size = 12),
                   legend.position = "hidden",
                   legend.title = element_blank(),
@@ -409,15 +407,23 @@ server <- function(input, output, session) {
                       attendance_greater12hrs = sum(attendance_greater12hrs),
                       .groups = "drop") %>% 
             ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
-            geom_col(aes(y = number_of_attendances_aggregate), fill = "#E41A1D") +
-            geom_col(fill = "#4DAF4A") +
-            theme(legend.position = "bottom", legend.title = element_blank()) +
-            ggtitle(case_when(
-                input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
-                TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
-            scale_y_continuous(labels = scales::label_comma()) +
-            guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
-            facet_wrap(~year, scales = "free_x")
+            geom_col(aes(y = number_of_attendances_aggregate, fill = "2")) +
+            geom_col(aes(fill = "1")) +
+             ggtitle(case_when(
+                 input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+                 TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+             scale_y_continuous(labels = scales::label_comma()) +
+             scale_fill_manual(labels = c("Met Target", "Target Missed"), values = c("#4DAF4A", "#E41A1D")) +
+             facet_wrap(~year, scales = "free_x") +
+             labs(y = "No. Attendances",
+                  x = "\nMonth") +
+            theme_classic() +
+            theme(axis.text = element_text(size = 12),
+                  strip.text = element_text(size = 12),
+                  legend.position = "top",
+                  legend.title = element_blank(),
+                  legend.key.size = unit(0.8, "cm"),
+                  legend.text = element_text(size = 12))
         
     })
     
