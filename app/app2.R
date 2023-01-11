@@ -492,7 +492,7 @@ server <- function(input, output, session) {
         })
     
 # wait times graphs ------------------------------------------------------
-    
+
     output$wait_overlay <- renderPlot({
     
         ae_reactive() %>% 
@@ -503,8 +503,8 @@ server <- function(input, output, session) {
                   attendance_greater12hrs = sum(attendance_greater12hrs),
                   .groups = "drop") %>% 
         ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
-        geom_col(aes(y = number_of_attendances_aggregate), fill = "red") +
-        geom_col(fill = "green") +
+        geom_col(aes(y = number_of_attendances_aggregate), fill = "#E41A1D") +
+        geom_col(fill = "#4DAF4A") +
         theme(legend.position = "bottom", legend.title = element_blank()) +
         ggtitle(case_when(
             input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
@@ -527,9 +527,8 @@ server <- function(input, output, session) {
             mutate(proportion = value / attendance_sum) %>%
             mutate(target = ifelse(round(proportion * 100, 2) > 90, TRUE, FALSE),
                    x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid")) %>% 
-            mutate(Colour = ifelse(proportion > 0.9, "green", "red"))
-        
-        
+            mutate(Colour = ifelse(proportion > 0.9, "#4DAF4A", "#E41A1D"))
+
         ggplot(wt_targets) +
             geom_bar(aes(
                 x = x_label,
