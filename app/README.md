@@ -1,8 +1,8 @@
-# Dashbaord
+### Dashboard :computer:
 
-Global - load data / libraries
+[global](global.R) - all code for loading clean data & libraries used within this project.
 
-Server - any code for the dashboard server side processing
+[server](server.R) - any code for the dashboard server side processing.
 
-UI - front end layout / buttons etc
+[ui](ui.R) - all code for the user interface.
  

@@ -68,6 +68,8 @@ ae_activity_clean <- ae_activity_raw %>%
                   select(location, location_name), by = c("treatment_location" = "location")) %>% 
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
+    mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
+                                     TRUE ~ TRUE))
     filter(between(as.numeric(year), 2017, 2022))
 
 write_csv(ae_activity_clean, here("data/clean_data/ae_activity_clean.csv"))
