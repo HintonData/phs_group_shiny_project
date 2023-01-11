@@ -4,5 +4,5 @@
 
 [server](server.R) - any code for the dashboard server side processing.
 
-[ui][ui.R] - all code for the user interface.
+[ui](ui.R) - all code for the user interface.
  
