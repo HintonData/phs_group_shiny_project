@@ -73,10 +73,10 @@ server <- function(input, output, session) {
         
         if (input$findings_hb_input != "All"){
             
-        demo_deprivation_clean %>% 
-            filter(hb_name == input$findings_hb_input,
-                   admission_type == "All Inpatients",
-                   simd != "NA")
+            demo_deprivation_clean %>% 
+                filter(hb_name == input$findings_hb_input,
+                       admission_type == "All Inpatients",
+                       simd != "NA")
         }
         
         else
@@ -200,7 +200,6 @@ server <- function(input, output, session) {
                   legend.title = element_blank(),
                   legend.key.size = unit(1, "cm"),
                   legend.text = element_text(size = 12))
-        
     })
     
     output$demo_graph_gender_prop <- renderPlot({
@@ -294,10 +293,16 @@ server <- function(input, output, session) {
     output$demo_prop_depriv <- renderPlot({
         
         depriv_reactive() %>% 
-        group_by(simd, quarter) %>% 
-        summarise(total = sum(episodes)) %>% 
-        ggplot(aes(x = quarter, y = total)) +
-        geom_line(aes(colour = simd, group = simd)) +
+            group_by(simd, quarter) %>% 
+            summarise(total = sum(episodes)) %>% 
+            ggplot(aes(x = quarter, y = total)) +
+            geom_line(aes(colour = simd, group = simd)) +
+            labs(y = "Number of attendances",
+                 x = "\nMonth")  +
+            guides(colour = guide_legend(title = "SIMD Rating",
+                                         title.position = "top",
+                                         label.position = "top",
+                                         label.vjust = -5)) +
             theme_classic() +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
@@ -306,8 +311,47 @@ server <- function(input, output, session) {
                   axis.text.y = element_text(size = 12),
                   legend.position = "bottom",
                   legend.key.size = unit(1, "cm"),
-                  legend.text = element_text(size = 12))
+                  legend.text = element_text(size = 12),
+                  legend.title.align = 0.5) +
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "Nationwide Hospital Attendance, SIMD Rating",
+                TRUE ~ paste0("Hospital Attendance, SIMD Rating (NHS ", input$findings_hb_input, ") ")))
         
+    })
+    
+    output$demo_prop_depriv_cov <- renderPlot({
+    
+    total_simd <- depriv_reactive() %>%  
+        group_by(is_covid_year) %>% 
+        summarise(total_episodes = sum(episodes))
+    
+    depriv_reactive() %>%  
+        group_by(is_covid_year, simd) %>% 
+        summarise(sum_episodes = sum(episodes)) %>% 
+        left_join(total_simd, "is_covid_year") %>% 
+        mutate(proportion = sum_episodes / total_episodes,
+               is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+        ggplot(aes(x = is_covid_year, y = proportion)) +
+        geom_col(aes(fill = simd)) +
+        #adds label to each column
+        geom_label(aes(label = scales::percent(proportion, accuracy = 0.1), group = simd), 
+                   position = position_stack(vjust = 0.5))+
+        scale_fill_brewer(palette = "Dark2")+
+        labs(subtitle = "Pre-covid vs During Covid")+
+        #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
+        theme(panel.background = element_blank(),
+              panel.grid = element_blank(),
+              axis.line = element_blank(),
+              axis.text.y = element_blank(),
+              axis.title = element_blank(),
+              axis.ticks = element_blank(),
+              axis.text.x = element_text(face = "bold", 
+                                         size = 11, 
+                                         colour = "black"))+
+        ggtitle(case_when(
+            input$findings_hb_input == "All" ~ "Nationwide Proportion of Attendances by SIMD (Scotland)",
+            TRUE ~ paste0("Proportion of attendances by SIMD (NHS ", input$findings_hb_input, ")")))
+    
     })
     
     
@@ -327,7 +371,7 @@ server <- function(input, output, session) {
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
-                labs(y = "Number of attendences",
+                labs(y = "Number of attendances",
                      x = "\nMonth") +
                 theme_classic() +
                 theme(axis.text = element_text(size = 12),
@@ -346,7 +390,7 @@ server <- function(input, output, session) {
                 scale_y_continuous(labels = scales::label_comma()) +
                 guides(fill = guide_legend(nrow = 5, ncol= 4, byrow = TRUE)) +
                 facet_wrap(~year, scales = "free_x")+
-                labs(y = "Number of attendences",
+                labs(y = "Number of attendances",
                      x = "\nMonth") +
                 theme_classic() +
                 theme(axis.text = element_text(size = 12),
@@ -503,14 +547,14 @@ server <- function(input, output, session) {
             ggplot(aes(x = month, y = number_meeting_target_aggregate)) +
             geom_col(aes(y = number_of_attendances_aggregate, fill = "2")) +
             geom_col(aes(fill = "1")) +
-             ggtitle(case_when(
-                 input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
-                 TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
-             scale_y_continuous(labels = scales::label_comma()) +
-             scale_fill_manual(labels = c("Met Target", "Target Missed"), values = c("#4DAF4A", "#E41A1D")) +
-             facet_wrap(~year, scales = "free_x") +
-             labs(y = "No. Attendances",
-                  x = "\nMonth") +
+            ggtitle(case_when(
+                input$findings_hb_input == "All" ~ "NHS Scotland Aggregate A&E Attendance vs Wait Target, per Month",
+                TRUE ~ paste0("NHS ", input$findings_hb_input, " Aggregate A&E Attendance vs Wait Target, per Month"))) +
+            scale_y_continuous(labels = scales::label_comma()) +
+            scale_fill_manual(labels = c("Met Target", "Target Missed"), values = c("#4DAF4A", "#E41A1D")) +
+            facet_wrap(~year, scales = "free_x") +
+            labs(y = "No. Attendances",
+                 x = "\nMonth") +
             theme_classic() +
             theme(axis.text = element_text(size = 12),
                   strip.text = element_text(size = 12),
@@ -569,7 +613,7 @@ server <- function(input, output, session) {
     output$occupancy_kpi <- renderPlot({
         
         beds_reactive() %>% 
-        mutate(is_covid = (year >= 2020)) %>% 
+            mutate(is_covid = (year >= 2020)) %>% 
             group_by(year) %>% 
             summarise(occupancy_pct = mean(percentage_occupancy, na.rm = TRUE), is_covid) %>% 
             distinct() %>% 

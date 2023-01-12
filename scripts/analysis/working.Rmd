@@ -467,3 +467,21 @@ demo_deprivation_clean %>%
     geom_line(aes(colour = simd, group = simd))
 ```
 
+```{r}
+total_simd <- demo_deprivation_clean %>% 
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year) %>% 
+    summarise(total_episodes = sum(episodes))
+
+demo_deprivation_clean %>% 
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year, simd) %>% 
+    summarise(sum_episodes = sum(episodes)) %>% 
+    left_join(total_simd, "is_covid_year") %>% 
+    mutate(proportion = sum_episodes / total_episodes,
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+    ggplot(aes(x = is_covid_year, y = proportion, fill = simd)) +
+    geom_col() +
+    geom_label(aes(label = proportion), position = position_stack(), fill = "white")
+```
+
