@@ -297,7 +297,16 @@ server <- function(input, output, session) {
         group_by(simd, quarter) %>% 
         summarise(total = sum(episodes)) %>% 
         ggplot(aes(x = quarter, y = total)) +
-        geom_line(aes(colour = simd, group = simd))
+        geom_line(aes(colour = simd, group = simd)) +
+            theme_classic() +
+            theme(axis.text.x = element_text(angle = 45,
+                                             hjust = 1,
+                                             size = 12),
+                  axis.title.x = element_blank(),
+                  axis.text.y = element_text(size = 12),
+                  legend.position = "bottom",
+                  legend.key.size = unit(1, "cm"),
+                  legend.text = element_text(size = 12))
         
     })
     
