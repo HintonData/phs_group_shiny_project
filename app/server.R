@@ -150,6 +150,7 @@ server <- function(input, output, session) {
                 input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances, Sex (Scotland)",
                 TRUE ~ paste0("Hospital Attendances, Sex (NHS ", input$findings_hb_input, ")"))) +
             theme_classic() +
+            scale_colour_brewer(palette = "Dark2") +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
                                              size = 12),
@@ -192,6 +193,7 @@ server <- function(input, output, session) {
                 input$findings_hb_input == "All" ~ "Nationwide Hospital Attendances, Age Group (Scotland)",
                 TRUE ~ paste0("Hospital Attendances, Age Group (NHS ", input$findings_hb_input, ")"))) +
             theme_classic() +
+            scale_colour_brewer(palette = "Paired") +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
                                              size = 12),
@@ -305,6 +307,7 @@ server <- function(input, output, session) {
                                          label.position = "top",
                                          label.vjust = -5)) +
             theme_classic() +
+            scale_colour_brewer(palette = "Dark2") +
             theme(axis.text.x = element_text(angle = 45,
                                              hjust = 1,
                                              size = 12),
