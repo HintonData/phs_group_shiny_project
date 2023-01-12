@@ -1,0 +1,60 @@
+---
+title: "General Covid"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(lubridate)
+covid_impacts <- read_csv(here("data/raw_data/covid_wider_impacts.csv"))
+```
+
+```{r}
+hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+
+hb_clean <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+hospitals <- read_csv(here("data/raw_data/hospital_data.csv")) %>% clean_names()
+
+hospital_clean <- hospitals %>% 
+    select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
+    rename(longitude = x_coordinate, latitude = y_coordinate)
+```
+
+```{r}
+covid_impacts <- read_csv(here("data/raw_data/covid_wider_impacts.csv"))
+
+covid_impacts <- covid_impacts %>% 
+    clean_names() %>% 
+    left_join(hb_clean)
+
+write_csv(here("data/clean_data", file = "covid_impacts_clean"))
+```
+
+```{r}
+covid_impacts %>%
+    mutate(week_ending = ymd(week_ending)) %>% 
+    group_by(week_ending) %>% 
+    filter(sex == "All") %>% 
+    summarise(sum_admissions = sum(number_admissions)) %>% 
+    ggplot() +
+    aes(x = week_ending, y = sum_admissions) +
+    geom_line()
+```
+
+
+```{r}
+covid_impacts %>%
+    mutate(week_ending = ymd(week_ending)) %>% 
+    group_by(week_ending) %>% 
+    summarise(sum_admissions = sum(number_admissions)) %>% 
+    ggplot() +
+    aes(x = week_ending, y = sum_admissions) +
+    geom_line()
+```
+
+

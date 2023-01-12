@@ -1,0 +1,582 @@
+---
+title: "Demographics"
+output: html_notebook
+---
+
+```{r setup}
+library(tidyverse)
+library(here)
+library(janitor)
+library(lubridate)
+
+## for graphs later
+demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
+
+demo_clean <- demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%
+  mutate(q = str_sub(quarter, -2, -1),
+         q = factor(q, levels = c("Q1", "Q2", "Q3", "Q4"), ordered = TRUE),
+         year = yq(quarter),
+         year = year(year))
+
+waiting_times <- read_csv(here("data/clean_data/waiting_times_basic.csv"))
+```
+
+## import and clean data
+```{r}
+# healthboards
+hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+
+hb_clean <- hb_raw %>% 
+    select(hb, hb_name) %>% 
+    mutate(hb_name = str_remove(hb_name, "NHS "))
+
+shb_raw <- read_csv(here("data/raw_data/special_health_boards_and_national_facilities.csv")) %>% clean_names()
+
+shb_clean <- shb_raw %>% 
+    select(shb, shb_name) %>% 
+    rename(hb = shb, hb_name = shb_name)
+
+
+hb_joined <- rbind(hb_clean, shb_clean)
+
+write_csv(hb_joined, here("data/clean_data/hb_simple.csv"))
+```
+
+```{r}
+##Demographics Age & Sex
+as_demo_raw <- read_csv(here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_age_and_sex.csv")) %>% clean_names()
+
+
+as_demo_clean <- as_demo_raw %>% 
+    left_join(hb_joined, "hb") %>%
+    select(-ends_with("qf")) %>%
+    mutate(sex = factor(sex, c("Male", "Female")),
+           year = as.numeric(str_sub(quarter, 1, 4)),
+                    is_covid_year = case_when(
+           year <= 2019 ~ "Pre_Covid", # before covid
+           year >= 2020 ~ "Covid"), # 2020 Q1 + covid appears?
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+    filter(!is.na(is_covid_year))
+
+write_csv(as_demo_clean, here("data/clean_data/as_demo_clean"))
+```
+
+
+## graphs
+
+### Total admissions
+```{r}
+demo_totals <- as_demo_clean %>% 
+    mutate(
+        #remove Year from Quarter column
+        q = str_sub(quarter, -2, -1),
+        #create a factor
+        q = factor(
+            q,
+            levels = c("Q1", "Q2", "Q3", "Q4"),
+            ordered = TRUE
+        ),
+        year = yq(quarter),
+        year = year(year)
+    )
+
+demo_totals %>% 
+  group_by(quarter) %>% 
+  summarise(total_age_sex = sum(episodes)) %>% 
+  ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+  geom_line(colour = "steelblue") +
+  geom_point(colour = "steelblue") +
+  geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
+  geom_text(aes(x='2020Q1', label="\nCovid", y=1500000), colour="red", angle=90, text=element_text(size=11)) +
+  geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=1500000), colour="blue", angle=90, text=element_text(size=11))+
+  theme_classic() +
+  scale_y_continuous(labels = scales::comma, 
+                     expand = c(0, 0),
+                     limits = c(0, NA)) +
+  labs(title = "Nationwide Hospital Attendances (Scotland)",
+       y = "Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+## Proportions of Gender (pre & during covid)
+```{r}
+total_sex <- as_demo_clean %>% 
+  filter(admission_type == "All Inpatients")
+  group_by(is_covid_year) %>% 
+  summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>% 
+  group_by(is_covid_year, sex) %>% 
+  summarise(sum_episodes = sum(episodes)) %>% 
+  left_join(total_sex, "is_covid_year") %>% 
+  mutate(proportion = sum_episodes / total_episodes,
+         is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+  ggplot(aes(x = is_covid_year, y = proportion, fill = sex,
+             label = scales::percent(proportion, accuracy = 0.1))) +
+  geom_col() +
+  #adds label to each column
+  geom_label(position = position_stack(vjust = 0.5), fill = "white") +
+  scale_fill_brewer(palette = "Dark2")+
+  labs(title = "Proportion of attendances by sex",
+       subtitle = "Pre-covid vs During Covid",
+       fill = "Sex")+
+  #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
+  theme(panel.background = element_blank(),
+        panel.grid = element_blank(),
+        axis.line = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(face = "bold", 
+                                   size = 11, 
+                                   colour = "black"))
+```
+## Proportion Changes between genders and age groups (pre vs during covid)
+```{r}
+#get totals before covid and after covid (episodes)
+total_pre_covid <- as_demo_clean %>% 
+      group_by(is_covid_year) %>% 
+      summarise(total_episodes = sum(episodes))
+
+
+change_in_age <- as_demo_clean %>% 
+    group_by(is_covid_year, sex, age) %>%
+    summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_age_group = if_else(
+            is_covid_year == "Pre_Covid",
+            sum_episodes / total_episodes,
+            sum_episodes / total_episodes
+        )
+    ) %>%
+    #select relevant columns
+    select(-sum_episodes, -total_episodes) %>%
+    #pivot wider readability
+    pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
+    # get difference between covid & pre-covid numbers for graph
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid)
+
+#graph
+ggplot(change_in_age, aes(x = age, y = diff, fill = is_positive)) +
+  geom_col() +
+  geom_hline(yintercept = 0) +
+  geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+  scale_fill_brewer(palette = "Set1")+
+  labs(y = "Change (%)",
+       title = "Change in demographic proportions: Pre-Covid vs Covid")+
+  facet_wrap(~ sex, ncol = 1)+
+  theme_minimal()+
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(
+        size = 12, color = "black", face = "bold"
+        ),
+        strip.placement = "inside")
+```
+## Proportion Changes between admission type and gender (pre vs during covid)
+```{r}
+unique(as_demo_clean$admission_type)
+
+total_pre_covid_2 <- as_demo_clean %>% 
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year) %>% 
+  summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>%
+  # filter(hb_name %in% input$health_board_input) %>% 
+  group_by(is_covid_year, sex, admission_type) %>% 
+  summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid_2, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_diff = if_else(
+            is_covid_year == "Pre_Covid",
+            sum_episodes / total_episodes,
+            sum_episodes / total_episodes
+        )
+    ) %>%
+    #select relevant columns
+    select(-sum_episodes, -total_episodes) %>%
+    #pivot wider readability
+    pivot_wider(names_from = is_covid_year, values_from = prop_diff) %>%
+    # get difference between covid & pre-covid numbers for graph
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid) %>%
+    ggplot(aes(x = admission_type, y = diff, fill = is_positive)) +
+    geom_col() +
+    geom_hline(yintercept = 0) +
+    geom_text(aes(label = scales::percent(diff, accuracy = 0.01), y = diff + 0.0015 * sign(diff))) +
+    scale_fill_brewer(palette = "Set1")+
+    labs(y = "Change (%)",
+       title = "Change in demographic proportions: Pre-Covid vs Covid")+
+    facet_wrap(~ sex, ncol = 1)+
+    theme_minimal()+
+    theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 9, face = "bold"),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_blank(),
+        panel.grid = element_blank(),
+        strip.text.x = element_text(
+        size = 12, color = "black", face = "bold"
+        ),
+        strip.placement = "inside")
+```
+# map TEST
+```{r}
+library(sf)
+library(plotly)
+
+health_board_map <- st_read(dsn = here("data/raw_data/"),
+                                       layer = "sg_nhs_health_boards") %>% 
+  clean_names()
+
+health_board_map %>% 
+  #improve app performance (simplify number of points in map)
+  st_simplify(dTolerance = 1000) %>% 
+  st_cast("MULTIPOLYGON") %>% 
+  st_write(dsn = here("data/clean_data/"),
+           layer = "health_board_map_simple",
+           driver = "ESRI Shapefile")
+
+health_board_map %>%     
+ggplot() +
+  geom_sf(aes(fill = hb_name)) +
+  theme_void() +
+  theme(legend.position = "right")
+
+```
+
+```{r}
+p <- health_board_map %>%
+  ggplot(aes(text = hb_name)) +
+  geom_sf(fill = "gray90",
+          col = "gray40",
+          size = 0.1) +
+  geom_sf(
+    data = health_board_map,
+    #filter here?
+    fill = "steelblue",
+    size = 0.1,
+    colour = "white"
+  ) +
+  theme_void()
+    
+ggplotly(p, tooltip = "text") %>%
+  config(
+    scrollZoom = TRUE,
+    displayModeBar = F,
+    showAxisDragHandles = F
+  )
+```
+
+```{r}
+# hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+# 
+# hb_clean <- hb_raw %>% 
+#     select(hb, hb_name) %>% 
+#     mutate(hb_name = str_remove(hb_name, "NHS "))
+# 
+# hospitals <- read_csv(here("data/raw_data/hospital_data.csv")) %>% clean_names()
+# 
+# hospital_clean <- hospitals %>% 
+#     select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
+#     rename(longitude = x_coordinate, latitude = y_coordinate)
+# 
+# 
+# waiting_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% clean_names()
+# 
+# waiting_times <- waiting_raw %>% 
+#     mutate(
+#         date_ym = ym(month),
+#         .before = month,
+#         year = year(date_ym),
+#         month = month(date_ym, label = TRUE)
+#     ) %>%
+#     left_join(hb_clean, c("hbt" = "hb")) %>%
+#     left_join(hospital_clean, c("treatment_location" = "location", "hbt" = "hb")) %>%
+#     rename(
+#         total_attendances = number_of_attendances_aggregate,
+#         wait_lt_4hrs = number_meeting_target_aggregate,
+#         wait_gt_8hrs = attendance_greater8hrs,
+#         wait_gt_12hrs = attendance_greater12hrs,
+#         hospital_id = treatment_location,
+#         hospital_name = location_name
+#     ) %>%
+#     select(
+#         date_ym,
+#         year,
+#         hb_name,
+#         hospital_id,
+#         hospital_name,
+#         department_type,
+#         total_attendances,
+#         wait_lt_4hrs,
+#         wait_gt_8hrs,
+#         wait_gt_12hrs
+#     ) %>%
+#     mutate(wait_gt_4hrs = total_attendances - wait_lt_4hrs, .after = wait_lt_4hrs) %>%
+#     #fill missing values
+#     mutate(across(total_attendances:wait_gt_12hrs, .fns = ~ coalesce(., 0))) %>%
+#     #create column for when covid appears "year >= 2020"
+#     mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
+#                                      year >= 2020 ~ TRUE)) %>% 
+#     mutate(month = month(date_ym, label = TRUE, abbr = FALSE))
+
+#write_csv(waiting_times, here("data/clean_data/waiting_times_basic.csv"))
+```
+
+```{r}
+# pre-covid seasonal analysis
+waiting_times %>% 
+  filter(year < 2020) %>% 
+  group_by(year, month) %>% 
+  summarise(total_attendances = sum(total_attendances)) %>% 
+  ggplot(aes(x = month, y = total_attendances, group = year, col = factor(year))) +
+  geom_line()
+# covid seasonal analysis
+waiting_times %>% 
+  filter(year >= 2020) %>% 
+  group_by(year, month) %>% 
+  summarise(total_attendances = sum(total_attendances)) %>% 
+  ggplot(aes(x = month, y = total_attendances, group = year, col = factor(year))) +
+  geom_line()
+```
+
+```{r}
+# wait times -- less than 4 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_lt_4hrs = sum(wait_lt_4hrs)) %>% 
+  ggplot(aes(x = year, y = wait_lt_4hrs)) +
+  geom_col()
+# wait times --- greater than 4 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_4hrs = sum(wait_gt_4hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_4hrs)) +
+  geom_col()
+# wait times --- greater than 8 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_8hrs = sum(wait_gt_8hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_8hrs)) +
+  geom_col()
+# wait times --- greater than 12 hours
+waiting_times %>% 
+  group_by(year) %>% 
+  summarise(wait_gt_12hrs = sum(wait_gt_12hrs)) %>% 
+  ggplot(aes(x = year, y = wait_gt_12hrs)) +
+  geom_col()
+```
+
+```{r}
+# wait times less than 4 hours
+waiting_times %>% 
+  group_by(year, department_type) %>% 
+  summarise(total_attendances = sum(total_attendances),
+            wait_lt_4hrs = sum(wait_lt_4hrs),
+            prop_lt_4hrs = wait_lt_4hrs / total_attendances) %>% 
+  ggplot(aes(x = year, y = prop_lt_4hrs, fill = department_type)) +
+  geom_col(position = "dodge")
+```
+
+```{r}
+wt_targets <- waiting_times %>%
+  group_by(is_covid_year) %>%
+  summarise(
+    attendance_sum = sum(total_attendances),
+    wait_target = sum(wait_lt_4hrs)
+  ) %>%
+  pivot_longer(wait_target, names_to = "wait_time", values_to = "value") %>%
+  mutate(proportion = value / attendance_sum) %>%
+  mutate(target = ifelse(proportion > 0.9, TRUE, FALSE),
+         x_label = ifelse(is_covid_year == TRUE, "Covid", "Pre Covid"))
+  
+ggplot(wt_targets) +
+  geom_bar(aes(
+    x = x_label,
+    y = proportion,
+    fill = proportion > 0.9),
+    stat = "identity",
+    position = "dodge"
+  ) +
+  geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
+  coord_flip() +
+  theme(
+    legend.position = "none",
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x = element_blank(),
+    panel.background = element_blank(),
+    panel.grid = element_blank(),
+    axis.text.y = element_text(
+      size = 9,
+      color = "black",
+      face = "bold"
+    )
+  )+
+  ggtitle("")
+
+```
+
+```{r}
+total_ep_year <- demo_clean %>% 
+  group_by(year) %>% 
+  summarise(yearly_eps = sum(episodes))
+demo_clean %>% 
+  filter(year > 2016 & year <= 2019) %>% 
+  group_by(year, q) %>% 
+  summarise(q_episodes = sum(episodes)) %>%
+  left_join(total_ep_year, "year") %>%
+  mutate(q_percent = q_episodes / yearly_eps) %>% 
+  group_by(q) %>% 
+  summarise(avg_q_percent = mean(q_percent)) %>% 
+  ggplot(aes(x = q, y = avg_q_percent,
+             label = scales::percent(avg_q_percent, accuracy = 0.1)),
+             col = "black")+
+  geom_col(fill = "steelblue") +
+  geom_label(position = position_stack(vjust = 0.5),
+              col = "black", fill = "white") +
+  theme_classic() +
+  labs(title = "Average proportion of hospital attendances by quarter (Pre-Covid)",
+       y = "Proportion of Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+```
+```{r}
+demo_clean %>% 
+  filter(year > 2019) %>% 
+  group_by(year, q) %>% 
+  summarise(q_episodes = sum(episodes)) %>%
+  left_join(total_ep_year, "year") %>%
+  mutate(q_percent = q_episodes / yearly_eps) %>% 
+  group_by(q) %>% 
+  summarise(avg_q_percent = mean(q_percent)) %>% 
+  ggplot(aes(x = q, y = avg_q_percent,
+             label = scales::percent(avg_q_percent, accuracy = 0.1),
+             fill = q),
+             col = "black") +
+  geom_col(fill = "#E41A1D") +
+  geom_label(position = position_stack(vjust = 0.5),
+              col = "black", fill = "white") +
+  theme_classic() +
+  labs(title = "Average proportion of hospital attendances by quarter (Covid)", 
+       col = "Health Board",
+       y = "Proportion of Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        legend.position = "none")
+```
+
+```{r}
+library(sf)
+
+health_board_map <- st_read(dsn = here("data/clean_data/"),
+                            layer = "health_board_map_simple")
+
+hb_avg_admissions <- demo_clean %>% 
+  filter(admission_type == "All Inpatients") %>% 
+  group_by(year, hb_name) %>% 
+  summarise(avg_yr_admissions = sum(episodes)) %>% 
+  group_by(hb_name) %>% 
+  summarise(avg_admissions = mean(avg_yr_admissions))
+
+hb_simple <- st_read(dsn = here("data/clean_data/"),
+        layer = "health_board_map_simple") %>% 
+  left_join(hb_avg_admissions, "hb_name") %>%
+  ggplot() +
+  geom_sf(aes(fill = avg_admissions)) +
+  scale_fill_distiller(palette = "Blues", direction = 1, labels = scales::comma) +
+  theme_void() +
+  labs(fill = "Annual hospital admissions",
+       title = "Nationwide Average hospital admissions by Location (Scotland)")
+hb_simple
+
+
+hb_avg_admissions %>% 
+  filter(!is.na(hb_name)) %>% 
+  arrange(desc(avg_admissions)) %>% 
+  head(5)
+```
+
+```{r}
+demo_totals <- demo_clean %>% 
+    mutate(
+        #remove Year from Quarter column
+        q = str_sub(quarter, -2, -1),
+        #create a factor
+        q = factor(
+            q,
+            levels = c("Q1", "Q2", "Q3", "Q4"),
+            ordered = TRUE
+        ),
+        year = yq(quarter),
+        year = year(year)
+    )
+
+demo_totals %>% 
+  group_by(quarter) %>% 
+  summarise(total_age_sex = sum(episodes)) %>% 
+  ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+  geom_line(colour = "steelblue") +
+  geom_point(colour = "steelblue") +
+  geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
+  geom_text(aes(x='2020Q1', label="\nCovid", y=250000), colour="red", angle=90, text=element_text(size=11)) +
+  geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=250000), colour="blue", angle=90, text=element_text(size=11))+
+  theme_classic() +
+  scale_y_continuous(labels = scales::comma, 
+                     expand = c(0, 0),
+                     limits = c(0, NA)) +
+  labs(title = "Nationwide Hospital Attendances (Scotland)",
+       y = "Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+
+```{r}
+hb_worse <- demo_clean %>% 
+  group_by(is_covid_year, hb_name) %>% 
+  summarise(avg_yr_admissions = sum(episodes)) %>% 
+    pivot_wider(names_from = is_covid_year, values_from = avg_yr_admissions) %>% 
+    mutate(is_worse = (Covid > Pre_Covid))
+
+
+hb_simple <- st_read(dsn = here("data/clean_data/"),
+        layer = "health_board_map_simple") %>% 
+  left_join(hb_worse, "hb_name") %>%
+  ggplot() +
+  geom_sf(aes(fill = is_worse))+
+  theme_void() +
+  scale_fill_manual(labels = c("Less admissions", "More admissions"), values = c("#E41A1D", "#4DAF4A")) +
+  labs(fill = "Annual hospital admissions",
+       title = "Nationwide Changes in admissions \nsince covid began (Scotland)")+
+  theme(legend.title = element_blank())
+hb_simple
+
+hb_worse
+```
+
