@@ -536,8 +536,9 @@ server <- function(input, output, session) {
             geom_label(aes(y = proportion / 2, x = x_label, label = paste0("",round(proportion * 100, 2), "%")))+
             coord_flip() +
             scale_fill_identity()+
+            scale_fill_manual(labels = c("Met Target", "Target Missed"), values = c("#4DAF4A", "#E41A1D")) +
             theme(
-                legend.position = "none",
+                legend.title = element_blank(),
                 axis.title.y = element_blank(),
                 axis.ticks.y = element_blank(),
                 axis.ticks.x = element_blank(),
@@ -567,7 +568,7 @@ server <- function(input, output, session) {
             geom_col() +
             geom_label(aes(y = occupancy_pct, label = paste0(round(occupancy_pct, 2), "%")), fill = "white") +
             scale_x_continuous(breaks = c(2017:2022)) +
-            scale_fill_manual(labels = c("Pre-Covid", "Covid"), values = c("#4DAF4A", "#E41A1D")) +
+            scale_fill_manual(labels = c("Pre-Covid", "Covid"), values = c("steelblue", "#E41A1D")) +
             labs(y = "Average Occupancy (%)\n",
                  x = "\nYear",
                  title = "Average Bed Occupancy per Year") +
