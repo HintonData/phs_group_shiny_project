@@ -81,7 +81,9 @@ server <- function(input, output, session) {
         
         else
         {
-            demo_deprivation_clean
+            demo_deprivation_clean %>% 
+                filter(admission_type == "All Inpatients",
+                       simd != "NA")
         }
         
     })

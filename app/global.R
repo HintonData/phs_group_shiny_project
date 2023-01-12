@@ -16,6 +16,7 @@ hb_names_basic <- read_csv(here("data/clean_data/hb_basic.csv"))
 ae_activity <- read_csv(here("data/clean_data/ae_activity_clean.csv"))
 covid_impacts <- read_csv(here("data/clean_data/covid_impacts_clean.csv"))
 beds <- read_csv(here("data/clean_data/beds_clean.csv"))
+demo_deprivation_clean <- read_csv(here("data/clean_data/demo_deprivation_clean.csv"))
 
 hb_choices <- sort(append(unique(hb_names$hb_name), "All"))
 hb_choices_basic <- sort(append(unique(hb_names_basic$hb_name), "All"))
