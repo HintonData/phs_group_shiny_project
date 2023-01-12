@@ -59,12 +59,13 @@ server <- function(input, output, session) {
     beds_reactive <- reactive({
         
         if (input$findings_hb_input != "All"){
-            beds %>% filter(hb_name == input$findings_hb_input)
+            beds %>% filter(hb_name == input$findings_hb_input,
+                            specialty_name == "All Acute")
         }
         
         else
         {
-            beds
+            beds %>%  filter(specialty_name == "All Acute")
         }
     })
     
