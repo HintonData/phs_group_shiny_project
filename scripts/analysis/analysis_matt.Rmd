@@ -8,6 +8,18 @@ library(tidyverse)
 library(here)
 library(janitor)
 library(lubridate)
+
+## for graphs later
+demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
+
+demo_clean <- demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%
+  mutate(q = str_sub(quarter, -2, -1),
+         q = factor(q, levels = c("Q1", "Q2", "Q3", "Q4"), ordered = TRUE),
+         year = yq(quarter),
+         year = year(year))
+
+waiting_times <- read_csv(here("data/clean_data/waiting_times_basic.csv"))
 ```
 
 ## import and clean data
@@ -280,59 +292,59 @@ ggplotly(p, tooltip = "text") %>%
 ```
 
 ```{r}
-hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+# hb_raw <- read_csv(here("data/raw_data/hb14_hb19.csv")) %>% clean_names()
+# 
+# hb_clean <- hb_raw %>% 
+#     select(hb, hb_name) %>% 
+#     mutate(hb_name = str_remove(hb_name, "NHS "))
+# 
+# hospitals <- read_csv(here("data/raw_data/hospital_data.csv")) %>% clean_names()
+# 
+# hospital_clean <- hospitals %>% 
+#     select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
+#     rename(longitude = x_coordinate, latitude = y_coordinate)
+# 
+# 
+# waiting_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% clean_names()
+# 
+# waiting_times <- waiting_raw %>% 
+#     mutate(
+#         date_ym = ym(month),
+#         .before = month,
+#         year = year(date_ym),
+#         month = month(date_ym, label = TRUE)
+#     ) %>%
+#     left_join(hb_clean, c("hbt" = "hb")) %>%
+#     left_join(hospital_clean, c("treatment_location" = "location", "hbt" = "hb")) %>%
+#     rename(
+#         total_attendances = number_of_attendances_aggregate,
+#         wait_lt_4hrs = number_meeting_target_aggregate,
+#         wait_gt_8hrs = attendance_greater8hrs,
+#         wait_gt_12hrs = attendance_greater12hrs,
+#         hospital_id = treatment_location,
+#         hospital_name = location_name
+#     ) %>%
+#     select(
+#         date_ym,
+#         year,
+#         hb_name,
+#         hospital_id,
+#         hospital_name,
+#         department_type,
+#         total_attendances,
+#         wait_lt_4hrs,
+#         wait_gt_8hrs,
+#         wait_gt_12hrs
+#     ) %>%
+#     mutate(wait_gt_4hrs = total_attendances - wait_lt_4hrs, .after = wait_lt_4hrs) %>%
+#     #fill missing values
+#     mutate(across(total_attendances:wait_gt_12hrs, .fns = ~ coalesce(., 0))) %>%
+#     #create column for when covid appears "year >= 2020"
+#     mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
+#                                      year >= 2020 ~ TRUE)) %>% 
+#     mutate(month = month(date_ym, label = TRUE, abbr = FALSE))
 
-hb_clean <- hb_raw %>% 
-    select(hb, hb_name) %>% 
-    mutate(hb_name = str_remove(hb_name, "NHS "))
-
-hospitals <- read_csv(here("data/raw_data/hospital_data.csv")) %>% clean_names()
-
-hospital_clean <- hospitals %>% 
-    select(location, location_name, x_coordinate, y_coordinate, hb) %>% 
-    rename(longitude = x_coordinate, latitude = y_coordinate)
-
-
-waiting_raw <- read_csv(here("data/raw_data/ae_activity.csv")) %>% clean_names()
-
-waiting_times <- waiting_raw %>% 
-    mutate(
-        date_ym = ym(month),
-        .before = month,
-        year = year(date_ym),
-        month = month(date_ym, label = TRUE)
-    ) %>%
-    left_join(hb_clean, c("hbt" = "hb")) %>%
-    left_join(hospital_clean, c("treatment_location" = "location", "hbt" = "hb")) %>%
-    rename(
-        total_attendances = number_of_attendances_aggregate,
-        wait_lt_4hrs = number_meeting_target_aggregate,
-        wait_gt_8hrs = attendance_greater8hrs,
-        wait_gt_12hrs = attendance_greater12hrs,
-        hospital_id = treatment_location,
-        hospital_name = location_name
-    ) %>%
-    select(
-        date_ym,
-        year,
-        hb_name,
-        hospital_id,
-        hospital_name,
-        department_type,
-        total_attendances,
-        wait_lt_4hrs,
-        wait_gt_8hrs,
-        wait_gt_12hrs
-    ) %>%
-    mutate(wait_gt_4hrs = total_attendances - wait_lt_4hrs, .after = wait_lt_4hrs) %>%
-    #fill missing values
-    mutate(across(total_attendances:wait_gt_12hrs, .fns = ~ coalesce(., 0))) %>%
-    #create column for when covid appears "year >= 2020"
-    mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
-                                     year >= 2020 ~ TRUE)) %>% 
-    mutate(month = month(date_ym, label = TRUE, abbr = FALSE))
-
-write_csv(waiting_times, here("data/clean_data/waiting_times_basic.csv"))
+#write_csv(waiting_times, here("data/clean_data/waiting_times_basic.csv"))
 ```
 
 ```{r}
@@ -429,17 +441,6 @@ ggplot(wt_targets) +
   )+
   ggtitle("")
 
-```
-
-```{r}
-demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
-
-demo_clean <- demo_clean %>% 
-    filter(admission_type == "All Inpatients") %>%
-  mutate(q = str_sub(quarter, -2, -1),
-         q = factor(q, levels = c("Q1", "Q2", "Q3", "Q4"), ordered = TRUE),
-         year = yq(quarter),
-         year = year(year))
 ```
 
 ```{r}
