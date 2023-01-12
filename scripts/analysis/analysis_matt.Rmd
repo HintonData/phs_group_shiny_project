@@ -570,9 +570,10 @@ hb_simple <- st_read(dsn = here("data/clean_data/"),
   ggplot() +
   geom_sf(aes(fill = is_worse))+
   theme_void() +
+  scale_fill_manual(labels = c("Less admissions", "More admissions"), values = c("#E41A1D", "#4DAF4A")) +
   labs(fill = "Annual hospital admissions",
        title = "Nationwide Changes in admissions \nsince covid began (Scotland)")+
-  theme(legend.position = "none")
+  theme(legend.title = element_blank())
 hb_simple
 
 hb_worse
