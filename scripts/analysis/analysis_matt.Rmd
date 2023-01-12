@@ -91,6 +91,7 @@ demo_totals %>%
 ## Proportions of Gender (pre & during covid)
 ```{r}
 total_sex <- as_demo_clean %>% 
+  filter(admission_type == "All Inpatients")
   group_by(is_covid_year) %>% 
   summarise(total_episodes = sum(episodes))
 
@@ -434,6 +435,7 @@ ggplot(wt_targets) +
 demo_clean <- read_csv(here("data/clean_data/as_demo_clean.csv"))
 
 demo_clean <- demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%
   mutate(q = str_sub(quarter, -2, -1),
          q = factor(q, levels = c("Q1", "Q2", "Q3", "Q4"), ordered = TRUE),
          year = yq(quarter),
@@ -477,7 +479,7 @@ demo_clean %>%
              label = scales::percent(avg_q_percent, accuracy = 0.1),
              fill = q),
              col = "black") +
-  geom_col(fill = "orange") +
+  geom_col(fill = "#E41A1D") +
   geom_label(position = position_stack(vjust = 0.5),
               col = "black", fill = "white") +
   theme_classic() +
@@ -495,6 +497,7 @@ health_board_map <- st_read(dsn = here("data/clean_data/"),
                             layer = "health_board_map_simple")
 
 hb_avg_admissions <- demo_clean %>% 
+  filter(admission_type == "All Inpatients") %>% 
   group_by(year, hb_name) %>% 
   summarise(avg_yr_admissions = sum(episodes)) %>% 
   group_by(hb_name) %>% 
@@ -507,7 +510,8 @@ hb_simple <- st_read(dsn = here("data/clean_data/"),
   geom_sf(aes(fill = avg_admissions)) +
   scale_fill_distiller(palette = "Blues", direction = 1, labels = scales::comma) +
   theme_void() +
-  labs(fill = "Annual hospital admissions")
+  labs(fill = "Annual hospital admissions",
+       title = "Nationwide Average hospital admissions by Location (Scotland)")
 hb_simple
 
 
@@ -515,5 +519,62 @@ hb_avg_admissions %>%
   filter(!is.na(hb_name)) %>% 
   arrange(desc(avg_admissions)) %>% 
   head(5)
+```
+
+```{r}
+demo_totals <- demo_clean %>% 
+    mutate(
+        #remove Year from Quarter column
+        q = str_sub(quarter, -2, -1),
+        #create a factor
+        q = factor(
+            q,
+            levels = c("Q1", "Q2", "Q3", "Q4"),
+            ordered = TRUE
+        ),
+        year = yq(quarter),
+        year = year(year)
+    )
+
+demo_totals %>% 
+  group_by(quarter) %>% 
+  summarise(total_age_sex = sum(episodes)) %>% 
+  ggplot(aes(x = quarter, y = total_age_sex, group = 1)) +
+  geom_line(colour = "steelblue") +
+  geom_point(colour = "steelblue") +
+  geom_vline(xintercept = '2020Q1', color = 'black', linetype="dotted")+
+  geom_text(aes(x='2020Q1', label="\nCovid", y=250000), colour="red", angle=90, text=element_text(size=11)) +
+  geom_text(aes(x='2020Q1', label="Pre-Covid\n", y=250000), colour="blue", angle=90, text=element_text(size=11))+
+  theme_classic() +
+  scale_y_continuous(labels = scales::comma, 
+                     expand = c(0, 0),
+                     limits = c(0, NA)) +
+  labs(title = "Nationwide Hospital Attendances (Scotland)",
+       y = "Hospital Attendances") +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+
+```{r}
+hb_worse <- demo_clean %>% 
+  group_by(is_covid_year, hb_name) %>% 
+  summarise(avg_yr_admissions = sum(episodes)) %>% 
+    pivot_wider(names_from = is_covid_year, values_from = avg_yr_admissions) %>% 
+    mutate(is_worse = (Covid > Pre_Covid))
+
+
+hb_simple <- st_read(dsn = here("data/clean_data/"),
+        layer = "health_board_map_simple") %>% 
+  left_join(hb_worse, "hb_name") %>%
+  ggplot() +
+  geom_sf(aes(fill = is_worse))+
+  theme_void() +
+  labs(fill = "Annual hospital admissions",
+       title = "Nationwide Changes in admissions \nsince covid began (Scotland)")+
+  theme(legend.position = "none")
+hb_simple
+
+hb_worse
 ```
 
