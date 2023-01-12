@@ -195,16 +195,13 @@ server <- function(input, output, session) {
             left_join(total_sex, "is_covid_year") %>% 
             mutate(proportion = sum_episodes / total_episodes,
                    is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
-            ggplot(aes(x = is_covid_year, y = proportion, fill = sex)) +
-            geom_col() +
+            ggplot(aes(x = is_covid_year, y = proportion)) +
+            geom_col(aes(fill = sex)) +
             #adds label to each column
-            geom_label(aes(label = scales::percent(proportion, accuracy = 0.1)), 
-                       position = position_stack(), vjust = 0) +
-            geom_label(aes(label = scales::percent(proportion, accuracy = 0.1)), 
-                       position = position_stack(), vjust = 3, fill = "white") +
+            geom_label(aes(label = scales::percent(proportion, accuracy = 0.1), group = sex), 
+                       position = position_stack(vjust = 0.5))+
             scale_fill_brewer(palette = "Dark2")+
-            labs(subtitle = "Pre-covid vs During Covid",
-                 fill = "Sex")+
+            labs(subtitle = "Pre-covid vs During Covid")+
             #fix aesthetics (removing background etc (theme_void() doesn't remove everything correctly))
             theme(panel.background = element_blank(),
                   panel.grid = element_blank(),
