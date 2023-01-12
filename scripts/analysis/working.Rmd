@@ -485,3 +485,14 @@ demo_deprivation_clean %>%
     geom_label(aes(label = proportion), position = position_stack(), fill = "white")
 ```
 
+```{r}
+as_demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>% 
+    group_by(is_covid_year, age, sex) %>% 
+    summarise(total = sum(episodes)) %>% 
+    ggplot(aes(x = age, y = total)) +
+    geom_col() +
+    facet_grid(is_covid_year ~ sex)
+```
+
+

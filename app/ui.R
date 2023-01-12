@@ -98,9 +98,8 @@ tabItem(tabName = "findings",
                                       ),
                                       
                                       fluidRow(
-                                          column(3),
                                           column(6, plotOutput("demo_prop_depriv_cov")),
-                                          column(3)
+                                          column(6, plotOutput("impact_pop_demos"))
                                       )),
                              
                              tabPanel("2020-",

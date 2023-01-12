@@ -635,6 +635,32 @@ server <- function(input, output, session) {
                   legend.text = element_text(size = 12))
     })
     
+    output$impact_pop_demos <- renderPlot({
+        
+       demo_clean() %>% 
+            group_by(is_covid_year, age, sex) %>% 
+            summarise(total = sum(episodes)) %>% 
+            mutate(sex_f = factor(sex, levels = c("Male", "Female")),
+                   cov_f = factor(is_covid_year, levels = c("Pre_Covid", "Covid"))) %>% 
+            ggplot(aes(x = age, y = total, fill = sex_f)) +
+            geom_col() +
+            facet_grid(cov_f ~ sex_f) +
+            theme_classic() +
+            labs(y = "Total Episodes",
+                 x = "Age Group") +
+            scale_y_continuous(labels = scales::label_comma()) +
+            scale_fill_brewer(palette = "Dark2", direction = -1) +
+            theme(axis.text.x = element_text(angle = 45,
+                                             hjust = 1,
+                                             size = 9),
+                  axis.text.y = element_text(size = 12),
+                  legend.position = "hide",
+                  legend.title = element_blank(),
+                  legend.key.size = unit(1, "cm"),
+                  legend.text = element_text(size = 12),
+                  strip.text = element_text(size = 12))
+    })
+    
     #page 3 (Datatables) -------------------------------------------------
     
     output$demo_table <- renderDataTable(
