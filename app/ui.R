@@ -55,10 +55,16 @@ tabItem(tabName = "findings",
                       tabBox(id = "findings_tabs",
                              width = 12,
                              
-                             tabPanel("Demographics",
+                             tabPanel("Demographics - Age/Sex",
                                       fluidRow(column(12, 
                                                       plotOutput("demo_graph_gender"),
                                                       plotOutput("demo_graph_age")
+                                      ))
+                             ),
+                             
+                             tabPanel("Demographics - Deprivation",
+                                      fluidRow(column(12, 
+                                                      plotOutput("demo_prop_depriv")
                                       ))
                              ),
                              

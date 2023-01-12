@@ -68,6 +68,24 @@ server <- function(input, output, session) {
         }
     })
     
+    depriv_reactive <- reactive({
+        
+        
+        if (input$findings_hb_input != "All"){
+            
+        demo_deprivation_clean %>% 
+            filter(hb_name == input$findings_hb_input,
+                   admission_type == "All Inpatients",
+                   simd != "NA")
+        }
+        
+        else
+        {
+            demo_deprivation_clean
+        }
+        
+    })
+    
     # map ---------------------------------------------------------------  
     map_reactive <- reactive({
         
@@ -270,6 +288,18 @@ server <- function(input, output, session) {
             ggtitle(case_when(
                 input$findings_hb_input == "All" ~ "Change in demographic proportions: Pre-Covid vs Covid",
                 TRUE ~ paste0("Change in demographic proportions: Pre-Covid vs Covid (NHS ", input$findings_hb_input, ") ")))
+    })
+    
+    # deprivation graphs -------------------------------------------------------
+    
+    output$demo_prop_depriv <- renderPlot({
+        
+        depriv_reactive() %>% 
+        group_by(simd, quarter) %>% 
+        summarise(total = sum(episodes)) %>% 
+        ggplot(aes(x = quarter, y = total)) +
+        geom_line(aes(colour = simd, group = simd))
+        
     })
     
     

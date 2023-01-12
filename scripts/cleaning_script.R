@@ -69,7 +69,7 @@ ae_activity_clean <- ae_activity_raw %>%
     relocate(hb_name, .after = hbt) %>% 
     relocate(location_name, .after = treatment_location) %>%
     mutate(is_covid_year = case_when(year <= 2019 ~ FALSE,
-                                     TRUE ~ TRUE))
+                                     TRUE ~ TRUE)) %>% 
     filter(between(as.numeric(year), 2017, 2022))
 
 write_csv(ae_activity_clean, here("data/clean_data/ae_activity_clean.csv"))
@@ -97,4 +97,21 @@ covid_impacts <- covid_impacts %>%
     left_join(hb_clean)
 
 write_csv(covid_impacts, here("data/clean_data/covid_impacts_clean.csv"))
+
+## Deprivation
+
+demo_deprivation_raw <- read_csv(here::here("data/raw_data/inpatient_and_daycase_by_nhs_board_of_treatment_and_simd.csv")) %>% 
+    clean_names()
+
+demo_deprivation_clean <- demo_deprivation_raw %>% 
+    left_join(hb_joined, "hb") %>%
+    select(-ends_with("qf")) %>% 
+    mutate(simd = factor(simd, 1:5),
+           year = as.numeric(str_sub(quarter, 1, 4)),
+           is_covid_year = case_when(
+               year <= 2019 ~ "Pre_Covid", # before covid
+               year >= 2020 ~ "Covid"), # 2020 Q1 + covid appears?
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid")))
+
+write_csv(demo_deprivation_clean, here("data/clean_data/demo_deprivation_clean.csv"))
 

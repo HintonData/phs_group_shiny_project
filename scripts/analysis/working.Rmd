@@ -54,6 +54,8 @@ ae_covid_raw <- read_csv(here::here("data/raw_data/a_and_e_hb_agesex_20221207.cs
 ae_covid <- ae_covid_raw %>% 
     left_join(codes_hb, by = "hb") %>% 
     relocate(hb_name, .after = hb)
+
+
 ```
 
 ```{r AE Graph and simulate filter}
@@ -280,21 +282,21 @@ as_demo_clean %>%
     summarise(episodes = sum(episodes),
               average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
               average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
-            mutate(diff = case_when(
-            quarter == "2017Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2018Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2018Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2019Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2019Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2020Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2020Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2021Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
-            quarter == "2021Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode)), 4) * 100,
-            TRUE ~ NA_real_)) %>% 
+    mutate(diff = case_when(
+        quarter == "2017Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2018Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2018Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2019Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2019Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2020Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2020Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2021Q2" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode, 1)), 4) * 100,
+        quarter == "2021Q4" ~ round(((lead(average_length_of_episode) - lag(average_length_of_episode, 1)) / lag(average_length_of_episode)), 4) * 100,
+        TRUE ~ NA_real_)) %>% 
     ggplot(aes(x = quarter, y = average_length_of_episode)) +
     geom_line(aes(group = 1)) +
-     geom_text(aes(y = 4, label = diff)) +
-        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
+    geom_text(aes(y = 4, label = diff)) +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2017Q3", linetype = "dashed") +
     geom_vline(xintercept = "2018Q1", linetype = "dashed") +
     geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(average_length_of_episode), ymax = Inf), alpha = 0.01) +
@@ -322,21 +324,21 @@ as_demo_clean %>%
     summarise(episodes = sum(episodes),
               average_length_of_episode = round(mean(average_length_of_episode, na.rm = TRUE), 2),
               average_length_of_stay = round(mean(average_length_of_stay, na.rm = TRUE), 2), .groups = "drop") %>% 
-            mutate(diff = case_when(
-            quarter == "2017Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2018Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2018Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2019Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2019Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2020Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2020Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2021Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
-            quarter == "2021Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay)), 4) * 100,
-            TRUE ~ NA_real_)) %>% 
+    mutate(diff = case_when(
+        quarter == "2017Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2018Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2018Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2019Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2019Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2020Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2020Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2021Q2" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay, 1)), 4) * 100,
+        quarter == "2021Q4" ~ round(((lead(average_length_of_stay) - lag(average_length_of_stay, 1)) / lag(average_length_of_stay)), 4) * 100,
+        TRUE ~ NA_real_)) %>% 
     ggplot(aes(x = quarter, y = average_length_of_stay)) +
     geom_line(aes(group = 1)) +
-     geom_text(aes(y = 6.5, label = diff)) +
-        geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
+    geom_text(aes(y = 6.5, label = diff)) +
+    geom_rect(aes(xmin = "2017Q3", xmax = "2018Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
     geom_vline(xintercept = "2017Q3", linetype = "dashed") +
     geom_vline(xintercept = "2018Q1", linetype = "dashed") +
     geom_rect(aes(xmin = "2018Q3", xmax = "2019Q1", ymin = min(average_length_of_stay), ymax = Inf), alpha = 0.01) +
@@ -373,17 +375,17 @@ as_demo_clean %>%
 ws_set_highlights <- function(df, col_name){
     
     df %>% 
-    mutate(diff = case_when(
-        yq == "2017Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2018Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2018Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2019Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2019Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2020Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2020Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2021Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
-        yq == "2021Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name)), 4) * 100,
-        TRUE ~ NA_real_))
+        mutate(diff = case_when(
+            yq == "2017Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2018Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2018Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2019Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2019Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2020Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2020Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2021Q2" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name, 1)), 4) * 100,
+            yq == "2021Q4" ~ round(((lead(df$col_name) - lag(df$col_name, 1)) / lag(df$col_name)), 4) * 100,
+            TRUE ~ NA_real_))
 }
 ```
 
@@ -400,9 +402,9 @@ beds %>%
 
 ```{r}
 as_demo_clean %>% 
-            filter(admission_type == "All Inpatients") %>% 
-            group_by(quarter, sex) %>% 
-            summarise(total_age_sex = sum(episodes)) 
+    filter(admission_type == "All Inpatients") %>% 
+    group_by(quarter, sex) %>% 
+    summarise(total_age_sex = sum(episodes)) 
 ```
 
 
@@ -410,48 +412,58 @@ as_demo_clean %>%
 as_demo_clean %>% 
     filter(quarter == "2017Q2") %>% 
     group_by(admission_type, quarter) %>%
-            summarise(total_age_sex = sum(episodes)) %>% 
+    summarise(total_age_sex = sum(episodes)) %>% 
     arrange(-total_age_sex)
 ```
 
 ```{r}
 total_sex <- as_demo_clean %>% 
-            filter(admission_type == "All Inpatients") %>%  
-            group_by(is_covid_year) %>% 
-            summarise(total_episodes = sum(episodes))
-        
-        as_demo_clean %>% 
-            filter(admission_type == "All Inpatients") %>%  
-            group_by(is_covid_year, sex) %>% 
-            summarise(sum_episodes = sum(episodes)) %>% 
-            left_join(total_sex, "is_covid_year") %>% 
-            mutate(proportion = sum_episodes / total_episodes,
-                   is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
-                        ggplot(aes(x = is_covid_year, y = proportion, fill = sex)) +
-                        geom_col() +
-                        geom_label(aes(label = proportion), position = position_stack(), fill = "white")
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year) %>% 
+    summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year, sex) %>% 
+    summarise(sum_episodes = sum(episodes)) %>% 
+    left_join(total_sex, "is_covid_year") %>% 
+    mutate(proportion = sum_episodes / total_episodes,
+           is_covid_year = factor(is_covid_year, c("Pre_Covid", "Covid"))) %>% 
+    ggplot(aes(x = is_covid_year, y = proportion, fill = sex)) +
+    geom_col() +
+    geom_label(aes(label = proportion), position = position_stack(), fill = "white")
 ```
 
 ```{r}
-        total_pre_covid <- as_demo_clean %>% 
-            filter(admission_type == "All Inpatients") %>%  
-            group_by(is_covid_year) %>% 
-            summarise(total_episodes = sum(episodes))
-        
-        as_demo_clean %>% 
-            filter(admission_type == "All Inpatients") %>%  
-            group_by(is_covid_year, sex, age) %>%
-            summarise(sum_episodes = sum(episodes)) %>%
-            left_join(total_pre_covid, by = "is_covid_year") %>%
-            mutate(
-                sex = factor(sex, c("Male", "Female")),
-                prop_age_group = (sum_episodes / total_episodes) * 100) %>%
-            select(-sum_episodes, -total_episodes) %>%
-            pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
-            mutate(diff = Covid - Pre_Covid,
-                   is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
-            select(-Covid, -Pre_Covid)
-        
-        total_pre_covid
+total_pre_covid <- as_demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year) %>% 
+    summarise(total_episodes = sum(episodes))
+
+as_demo_clean %>% 
+    filter(admission_type == "All Inpatients") %>%  
+    group_by(is_covid_year, sex, age) %>%
+    summarise(sum_episodes = sum(episodes)) %>%
+    left_join(total_pre_covid, by = "is_covid_year") %>%
+    mutate(
+        sex = factor(sex, c("Male", "Female")),
+        prop_age_group = (sum_episodes / total_episodes) * 100) %>%
+    select(-sum_episodes, -total_episodes) %>%
+    pivot_wider(names_from = is_covid_year, values_from = prop_age_group) %>%
+    mutate(diff = Covid - Pre_Covid,
+           is_positive = if_else(diff > 0, TRUE, FALSE)) %>%
+    select(-Covid, -Pre_Covid)
+
+total_pre_covid
+```
+
+```{r}
+demo_deprivation_clean %>% 
+    filter(admission_type == "All Inpatients",
+           simd != "NA") %>% 
+    group_by(simd, quarter) %>% 
+    summarise(total = sum(episodes)) %>% 
+    ggplot(aes(x = quarter, y = total)) +
+    geom_line(aes(colour = simd, group = simd))
 ```
 
