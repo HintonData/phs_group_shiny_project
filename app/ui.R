@@ -133,11 +133,11 @@ tabItem(tabName = "data_view",
 tabItem(tabName = "conclusion",
         h1("Conclusion"),
         p(
-            "Winter spike:"
+            "Winter crisis:"
         ),
         
         p(
-            "The winter spike is very real, and places great strain on the NHS system via more inpatients who generally stay for longer, driving up bed occupancy"
+            "The winter crisis is very real, and places great strain on the NHS system via more inpatients who generally stay for longer, driving up bed occupancy"
         ),
         
         p(
