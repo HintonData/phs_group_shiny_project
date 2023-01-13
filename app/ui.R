@@ -8,7 +8,8 @@ sidebar <- dashboardSidebar(
     sidebarMenu(
         menuItem("Overview", tabName = "overview"),
         menuItem("Findings", tabName = "findings"),
-        menuItem("Data View", tabName = "data_view")
+        menuItem("Data View", tabName = "data_view"),
+        menuItem("Conclusions", tabName = "conclusion")
         
     )
 )
@@ -126,6 +127,26 @@ tabItem(tabName = "data_view",
                          dataTableOutput("covid_table")),
                 tabPanel("Beds",
                          dataTableOutput("beds_table")))
+        )
+),
+
+tabItem(tabName = "conclusion",
+        h1("Conclusion"),
+        p(
+            "Winter spike:"
+        ),
+        
+        p(
+            "The winter spike is very real, and places great strain on the NHS system via more inpatients who generally stay for longer, driving up bed occupancy"
+        ),
+        
+        p(
+            "Covid Impact:"
+        ),
+        
+        p(
+            "Covid has had an impact across the whole of the National Health Service, with many more patients in hospitals leading to serious challenges in achieving wait targets. Covid itself has had an outsized effect on the elderly population"
+            
         )
 )
     )
