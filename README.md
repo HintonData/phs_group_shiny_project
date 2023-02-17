@@ -46,3 +46,6 @@ The datasets are covered by the Open Government License, which means that anyone
 ### findings
 ![findings of page dashboard](images/findings.png)
 
+### data_view
+![data view of page dashboard](images/data_view.png)
+
