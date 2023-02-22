@@ -50,9 +50,9 @@ Our dashboard contains:
     * Multiple visualisations for specific data points (a&e waiting times, hospital bed occupancies, general admissions)
 * Data view tab that allows the user to browse the data used within he application
 
-Our topic is ...
+Our topic is on the Covid pandemic and winter crises in Scotland. We wanted to answer two main questions: 'To what extent are the ‘winter crises’ reported by the media real?' and 'How has the Covid-19 pandemic affected provision of acute care in Scotland?'
 
-The dashboard outlines our topic in terms of ...
+The dashboard outlines our topic in terms of how Covid has impacted the NHS, specifically in terms of hospital services. It also outlines our analysis on the so-called ‘winter crises’ mentioned previously. Using data from Public Health Scotland, it showcases our key insights on the temporal, demographic and geographic angles, as well as general trends, and demonstrates our conclusions.
 
 ### Stages of the project
 
