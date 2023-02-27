@@ -1,0 +1,5 @@
+data_exploration_dashboard comments:
+
+The data can be explored here in a few different ways. First, we can change the Health board and have our graphs change to only be data from that health board. For example, in data_exploration_dashboard_1, we've looked at Ayrshire and Arran, while in data_exploration_dashboard_2 we've looked at Fife. This allows us to look at each health board individually and see the Covid demographics change accordingly. 
+
+We can also look at different categories. For example, data_exploration_dashboard_3, we've changed tab from 'Covid Impacts - Demographics' and are looking at 'A&E' graphs. In this screenshot, we've selected the Health board of Fife to get their A&E stats.s
