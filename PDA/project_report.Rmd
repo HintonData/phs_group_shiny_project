@@ -84,9 +84,23 @@ The dashboard outlines our topic in terms of how Covid has impacted the NHS, spe
 We initially started by analyzing the data to specifically identify and spot any trends,
 using data visualization techniques.
 
+However we also gathered information about the issues which where mentioned in the brief, by collecting reports and articles in the media and from research bodies allowed us to better understand the issues faced by the NHS. Which allowed us to see how they were interpreted by other organisations. Looking at different viewpoints of the issue, helped us make a more decisive interpretation of the issue on our own.
+
+We split the healthcare process into different sections: admission, activity and discharge, to help understand the entire process. Modelling the process this way allowed us to gain a full understanding of the flow of patients and help us highlight key insights in the data we had gathered from different sources.
+
+We tried to highlight potential problems in the system, the causes of these and their impact on patients throughout their journey in the healthcare system.
+
+
 ### Motivations for using the data you have chosen
 
-We used the specific datasets on hospital performance across Scotland to answer 'To what extent are the ‘winter crises’ reported by the media real?' and 'How has the Covid-19 pandemic affected provision of acute care in Scotland?'
+We used the Hospital admissions data which was broken down by age, deprivation to identify who was being admitted to hospital and why, also where the specific patients where originating from.
+
+A&E admission and waiting times data was used to identify exactly how quickly patients were being attended to and processed through the system.
+
+Bed Occupancy data provided an insight into the capacity of the hospital system.
+
+We used the specific datasets mentioned above to specifically to answer 'To what extent are the ‘winter crises’ reported by the media real?' and 'How has the Covid-19 pandemic affected provision of acute care in Scotland?'
+
 
 ### Data quality and potential bias, including a brief summary of data cleaning and transformations
 
@@ -96,7 +110,10 @@ The dataset contains no personal information, however the lengths of the data st
 
 The datasets don't provide any information about mortality of the virus, so we are unable to make a full understanding of true impact of the deadly virus. However this is understandable due to this data being very sensitive to loved ones, and could potentially be misused if they where to be fully released, alongside the current information available.
 
-To clean the datasets we picked out only information we requried for our analysis.
+To clean the datasets we picked out only information we required for our analysis.
+
+For example the demographics data, we cleaned this by removing columns with QF due to them not containing relevant information. We also added some new columns to this data, one column was based on the year by splitting the quarter column which had values like `2017Q1` where we grabbed the first 4 values in this case `2017`. Adding this year column allowed us to add an additional column `is_covid_year` which would help us identify if the year is `pre covid` or `covid` in this case it was any year `less than or equal to 2019` was `pre covid` and `greater than 2020 or equal to 2020` as `covid`, after adding this `is_covid_year` we then filtered the data to make sure we had no missing values.
+
 
 ### How is the data stored and structured
 
@@ -105,6 +122,7 @@ The data is in the form of linked data. Any data point contains a linked dataset
 This means data point can be viewed using a web browser and can be referenced by other linked datasets.
 
 Benefits of storing the data like this makes it highly convenient to connect multiple datasets together, to get a more robust view of all the data
+
 
 ### Ethical and legal considerations of the data
 
